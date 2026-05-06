@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Facilities Command Center</title>
+
+<style>
+:root {
+  --bg:#f4f1ea;
+  --panel:#fffaf1;
+  --panel2:#fffdf8;
+  --text:#2f3325;
+  --muted:#6f735f;
+  --accent:#5d6b3c;
+  --accent2:#3f4b2a;
+  --border:#d8c9aa;
+  --danger:#9b2c2c;
+  --warning:#9a6b1f;
+  --ok:#3f6f4f;
+  --shadow:0 8px 22px rgba(47,51,37,.12);
+  --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.4}
+header{position:sticky;top:0;z-index:10;background:rgba(244,241,234,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(8px)}
+.topbar{padding:12px 14px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.brand h1{font-size:1.15rem;margin:0}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:.86rem}
+.sync-pill{border:1px solid var(--border);background:var(--panel2);border-radius:999px;padding:8px 10px;display:flex;align-items:center;gap:7px;font-size:.82rem;white-space:nowrap}
+.sync-dot{width:10px;height:10px;border-radius:50%;background:var(--ok)}
+.top-nav{display:flex;gap:6px;overflow-x:auto;padding:0 12px 12px;scrollbar-width:thin}
+.top-nav button{flex:0 0 auto;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:9px 12px;font-weight:700;box-shadow:0 2px 8px rgba(47,51,37,.08)}
+.top-nav button.active{background:var(--accent);color:white;border-color:var(--accent)}
+main{max-width:1180px;margin:0 auto;padding:14px 14px 60px}
+.view{display:none}
+.view.active{display:block}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:14px}
+.panel-title{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.panel-title h2,.panel-title h3{margin:0}
+.meta{color:var(--muted);font-size:.88rem;margin:2px 0 0}
+.grid{display:grid;gap:12px}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:12px}
+.stat span{display:block;color:var(--muted);font-size:.82rem}
+.stat strong{display:block;font-size:1.55rem;margin-top:4px}
+.card-list{display:grid;gap:10px}
+.card{background:var(--panel2);border:1px solid var(--border);border-left:6px solid var(--accent);border-radius:14px;padding:11px}
+.card.danger{border-left-color:var(--danger)}
+.card.warning{border-left-color:var(--warning)}
+.card.ok{border-left-color:var(--ok)}
+.card h4{margin:0 0 4px}
+.card p{margin:3px 0;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{background:#f0e2c7;border-radius:999px;padding:3px 7px;font-size:.78rem;color:var(--text)}
+form,.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{display:grid;gap:4px;font-size:.86rem;color:var(--muted)}
+input,select,textarea{width:100%;border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--panel2);font:inherit;color:var(--text)}
+textarea{min-height:90px;resize:vertical}
+.full{grid-column:1/-1}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{border:none;background:var(--accent);color:white;border-radius:12px;padding:10px 12px;font-weight:700;cursor:pointer}
+button:hover{background:var(--accent2)}
+button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+button.danger{background:var(--danger)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:720px;background:var(--panel2);border-radius:12px;overflow:hidden}
+th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}
+th{background:#f0e2c7}
+.hidden{display:none!important}
+.small{font-size:.82rem}
+#printReport{display:none}
+@media (max-width:780px){
+  .topbar{align-items:flex-start;flex-direction:column}
+  .sync-pill{width:100%;justify-content:flex-start}
+  .grid.two,.grid.three,form,.form-grid{grid-template-columns:1fr}
+  main{padding:12px 10px 70px}
+}
+@media print{
+  header,.actions,form,.no-print{display:none!important}
+  body{background:white}
+  main{max-width:none;padding:0}
+  .view{display:none!important}
+  #printReport{display:block!important;padding:20px}
+  .panel,.card,.stat{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <h1>Facilities Command Center</h1>
+      <p>Repairs, projects, contractor bids, maintenance, fleet, and board reports.</p>
+    </div>
+    <div class="sync-pill">
+      <span class="sync-dot" id="syncDot"></span>
+      <strong id="syncStatusText">Saved locally</strong>
+    </div>
+  </div>
+
+  <nav class="top-nav" aria-label="Navigation">
+    <button class="tab active" data-view="dashboard">Dashboard</button>
+    <button class="tab" data-view="projects">Projects</button>
+    <button class="tab" data-view="bids">Bids</button>
+    <button class="tab" data-view="maintenance">Maintenance</button>
+    <button class="tab" data-view="fleet">Fleet</button>
+    <button class="tab" data-view="reports">Reports</button>
+    <button class="tab" data-view="importCenter">Import</button>
+    <button class="tab" data-view="settings">Settings</button>
+  </nav>
+</header>
+
+<main>
+  <section id="dashboard" class="view active">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Dashboard</h2>
+          <p class="meta">The first things to check when you open the app.</p>
+        </div>
+        <button onclick="syncNow()">Sync Now</button>
+      </div>
+      <div class="grid three">
+        <div class="stat"><span>Urgent / high tasks</span><strong id="urgentCount">0</strong></div>
+        <div class="stat"><span>Active projects</span><strong id="projectCount">0</strong></div>
+        <div class="stat"><span>Open bids</span><strong id="bidCount">0</strong></div>
+      </div>
+    </section>
+
+    <div class="grid two">
+      <section class="panel"><div class="panel-title"><div><h3>Urgent Repairs</h3><p class="meta">High priority work.</p></div></div><div id="urgentList" class="card-list"></div></section>
+      <section class="panel"><div class="panel-title"><div><h3>This Week</h3><p class="meta">Open maintenance and reminders.</p></div></div><div id="weekList" class="card-list"></div></section>
+      <section class="panel"><div class="panel-title"><div><h3>Fleet Alerts</h3><p class="meta">Vehicles needing service or tracking.</p></div></div><div id="fleetAlertList" class="card-list"></div></section>
+      <section class="panel"><div class="panel-title"><div><h3>Active Projects</h3><p class="meta">Remodels, repairs, and planning.</p></div></div><div id="activeProjectList" class="card-list"></div></section>
+    </div>
+
+    <section class="panel">
+      <div class="panel-title"><div><h3>Contractor Bids</h3><p class="meta">Open estimates needing review.</p></div></div>
+      <div id="dashboardBidList" class="card-list"></div>
+    </section>
+  </section>
+
+  <section id="projects" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Projects</h2><p class="meta">Use for remodels, repairs, board asks, and major facilities needs.</p></div></div>
+      <form id="projectForm">
+        <label>Project name<input id="projectName" required placeholder="Kitchen remodel, bathroom demo..." /></label>
+        <label>Location<input id="projectLocation" placeholder="Kitchen, Valley, Francis..." /></label>
+        <label>Status<select id="projectStatus"><option>Planning</option><option>In progress</option><option>Waiting on bid</option><option>Needs approval</option><option>Complete</option></select></label>
+        <label>Priority<select id="projectPriority"><option>Normal</option><option>High</option><option>Urgent</option></select></label>
+        <label>Estimated cost<input id="projectCost" type="number" min="0" step="0.01" placeholder="0.00" /></label>
+        <label>Target date<input id="projectDate" type="date" /></label>
+        <label class="full">Notes<textarea id="projectNotes" placeholder="Why this matters, safety issues, next steps..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Project</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Project List</h3></div><div id="projectList" class="card-list"></div></section>
+  </section>
+
+  <section id="bids" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Contractor Bids</h2><p class="meta">Track estimates, vendors, PDF/file names, and board recommendations.</p></div></div>
+      <form id="bidForm">
+        <label>Project<select id="bidProject"></select></label>
+        <label>Contractor / vendor<input id="bidVendor" required placeholder="Vendor name" /></label>
+        <label>Bid amount<input id="bidAmount" type="number" min="0" step="0.01" placeholder="0.00" /></label>
+        <label>Status<select id="bidStatus"><option>Received</option><option>Needs review</option><option>Recommended</option><option>Approved</option><option>Rejected</option></select></label>
+        <label>PDF/file name or link<input id="bidFile" placeholder="bid.pdf or https://..." /></label>
+        <label>Date received<input id="bidDate" type="date" /></label>
+        <label class="full">Notes<textarea id="bidNotes" placeholder="Scope, exclusions, concerns, recommendation..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Bid</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Bid Comparison</h3></div><div id="bidList" class="card-list"></div></section>
+  </section>
+
+  <section id="maintenance" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Maintenance</h2><p class="meta">Daily, weekly, monthly, and recurring facilities tasks.</p></div></div>
+      <form id="taskForm">
+        <label>Task<input id="taskName" required placeholder="Bathroom deep clean, kitchen checklist..." /></label>
+        <label>Location<input id="taskLocation" placeholder="Kitchen, Valley, Francis..." /></label>
+        <label>Due date<input id="taskDate" type="date" /></label>
+        <label>Frequency<select id="taskFrequency"><option>One-time</option><option>Daily</option><option>Weekly</option><option>Twice monthly</option><option>Monthly</option><option>Quarterly</option><option>Yearly</option></select></label>
+        <label>Priority<select id="taskPriority"><option>Normal</option><option>High</option><option>Urgent</option></select></label>
+        <label>Status<select id="taskStatus"><option>Open</option><option>In progress</option><option>Complete</option></select></label>
+        <label class="full">Notes<textarea id="taskNotes" placeholder="Specific steps, equipment notes, safety reminders..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Task</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Maintenance List</h3></div><div id="taskList" class="card-list"></div></section>
+  </section>
+
+  <section id="fleet" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Fleet</h2><p class="meta">Mileage, oil changes, tires, registration, warranty, and repairs.</p></div></div>
+      <form id="vehicleForm">
+        <label>Vehicle name<input id="vehicleName" required placeholder="Van 1, kitchen truck..." /></label>
+        <label>Plate / ID<input id="vehiclePlate" placeholder="Plate or internal ID" /></label>
+        <label>Mileage<input id="vehicleMileage" type="number" min="0" placeholder="Current mileage" /></label>
+        <label>Next service date<input id="vehicleService" type="date" /></label>
+        <label>Registration due<input id="vehicleRegistration" type="date" /></label>
+        <label>Status<select id="vehicleStatus"><option>Active</option><option>Needs service</option><option>Out of service</option></select></label>
+        <label class="full">Notes<textarea id="vehicleNotes" placeholder="Oil change, tire rotation, warranty, repair notes..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Vehicle</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Fleet List</h3></div><div id="vehicleList" class="card-list"></div></section>
+  </section>
+
+  <section id="reports" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Reports</h2><p class="meta">Board-ready summaries from the current records.</p></div></div>
+      <div class="actions">
+        <button onclick="buildReport(true)">Preview Report</button>
+        <button onclick="printBoardReport()">Print / Save as PDF</button>
+        <button class="ghost" onclick="downloadBackup()">Download Backup</button>
+      </div>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Report Preview</h3></div><div id="reportPreview"></div></section>
+  </section>
+
+
+  <section id="importCenter" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Import / Extraction Center</h2>
+          <p class="meta">Pull information from Excel, CSV, and PDF files into the facilities tracker.</p>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <section class="panel" style="box-shadow:none;">
+          <div class="panel-title">
+            <div>
+              <h3>Excel / CSV Import</h3>
+              <p class="meta">Best for task lists, bid logs, project lists, and fleet records.</p>
+            </div>
+          </div>
+
+          <label>What should these rows become?
+            <select id="spreadsheetImportType">
+              <option value="tasks">Maintenance Tasks</option>
+              <option value="projects">Projects</option>
+              <option value="bids">Contractor Bids</option>
+              <option value="vehicles">Fleet Vehicles</option>
+            </select>
+          </label>
+
+          <div class="actions">
+            <label class="ghost" style="display:inline-flex;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-weight:700;">
+              Choose Excel / CSV File
+              <input id="spreadsheetUpload" type="file" accept=".csv,.xlsx,.xls" hidden />
+            </label>
+          </div>
+
+          <p class="meta small">Tip: CSV files are easiest. Excel files also work using the SheetJS browser library.</p>
+        </section>
+
+        <section class="panel" style="box-shadow:none;">
+          <div class="panel-title">
+            <div>
+              <h3>PDF Text Extraction</h3>
+              <p class="meta">Use this for contractor bids, estimates, scopes of work, and reports.</p>
+            </div>
+          </div>
+
+          <label>Send extracted PDF text to:
+            <select id="pdfImportType">
+              <option value="bid">New Contractor Bid</option>
+              <option value="project">New Project</option>
+              <option value="note">Extraction Preview Only</option>
+            </select>
+          </label>
+
+          <div class="actions">
+            <label class="ghost" style="display:inline-flex;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-weight:700;">
+              Choose PDF File
+              <input id="pdfUpload" type="file" accept=".pdf" hidden />
+            </label>
+          </div>
+
+          <p class="meta small">PDF extraction works best on typed PDFs. Scanned/image-only PDFs may not extract readable text.</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h3>Extraction Preview</h3>
+          <p class="meta">Review what was found before relying on it.</p>
+        </div>
+      </div>
+      <textarea id="extractionPreview" class="full" style="width:100%;min-height:220px;" placeholder="Extracted text or spreadsheet preview will appear here."></textarea>
+      <div class="actions">
+        <button type="button" onclick="copyExtractionToClipboard()">Copy Preview Text</button>
+        <button type="button" class="ghost" onclick="clearExtractionPreview()">Clear Preview</button>
+      </div>
+    </section>
+  </section>
+
+  <section id="settings" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Settings</h2><p class="meta">Supabase is built in. No key entry needed.</p></div></div>
+      <div class="form-grid">
+        <label>Workspace name<input id="workspaceName" /></label>
+        <label>Planning note<input id="workspaceNote" /></label>
+      </div>
+      <div class="actions">
+        <button onclick="syncNow()">Sync Now</button>
+        <button class="ghost" onclick="loadFromCloud()">Load From Supabase</button>
+        <button class="ghost" onclick="downloadBackup()">Download Backup</button>
+        <label class="ghost" style="display:inline-flex;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-weight:700;">
+          Upload Backup
+          <input id="backupUpload" type="file" accept="application/json" hidden />
+        </label>
+      </div>
+      <p class="meta small">Status: <strong id="settingsSyncStatus">Saved locally</strong></p>
+      <p class="meta small">Workspace ID: <strong>facilities-main</strong> | Table: <strong>facilities_app_state</strong></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><div><h3>App Maintenance</h3><p class="meta">Only use this if you want to clear this device.</p></div></div>
+      <button class="danger" onclick="resetLocalData()">Reset Local App Data</button>
+    </section>
+  </section>
+</main>
+
+<section id="printReport"></section>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://vkjbmqpdrixjjjrrnbza.supabase.co";
+const SUPABASE_KEY = "sb_publishable_KzQmH4z479_6X0aCQMomgA_GNbCnkBA";
+const TABLE = "facilities_app_state";
+const WORKSPACE = "facilities-main";
+const LOCAL_KEY = "facilitiesCommandCenterFullV1";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const starter = {
+  projects: [{
+    id: id(), name: "Kitchen ventilation and layout adjustments", location: "Kitchen",
+    status: "Planning", priority: "Urgent", cost: 0, date: "",
+    notes: "Modify layout/walls to improve off-gassing and exhaust. Test all systems after changes."
+  }],
+  bids: [{
+    id: id(), projectId: "", vendor: "Evergreen Build Co.", amount: 17000,
+    status: "Needs review", file: "fake_contractor_bid.pdf", date: "",
+    notes: "Mock bid for demo, bathroom build-out, electrical, plumbing, and cleanup."
+  }],
+  tasks: [{
+    id: id(), name: "Daily kitchen equipment cleaning checklist", location: "Kitchen",
+    date: "", frequency: "Daily", priority: "High", status: "Open",
+    notes: "Kitchen staff complete cleaning, sanitation, and temp log responsibilities."
+  }],
+  vehicles: [{
+    id: id(), name: "Fleet vehicle placeholder", plate: "", mileage: "",
+    serviceDate: "", registration: "", status: "Active",
+    notes: "Add title, tags, oil changes, tire rotation, warranty, and repairs."
+  }],
+  settings: { workspaceName: "Facilities Command Center", workspaceNote: "Daily facilities operations and project planning" },
+  updatedAt: new Date().toISOString()
+};
+
+let app = loadLocal();
+let syncTimer = null;
+let syncStatus = "Saved locally";
+
+function id(){ return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()); }
+
+function loadLocal(){
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || structuredClone(starter); }
+  catch { return structuredClone(starter); }
+}
+
+function saveLocal(autoSync = true){
+  app.updatedAt = new Date().toISOString();
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(app));
+  setStatus(autoSync ? "Saved locally • syncing..." : "Saved locally");
+  render();
+  if(autoSync) queueSync();
+}
+
+function queueSync(){
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncNow(false), 900);
+}
+
+async function syncNow(showAlert = true){
+  try{
+    setStatus("Syncing...");
+    const { error } = await supabaseClient.from(TABLE).upsert({
+      workspace_id: WORKSPACE,
+      data: app,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "workspace_id" });
+    if(error) throw error;
+    setStatus("Synced");
+    if(showAlert) alert("Synced successfully.");
+  }catch(err){
+    console.error(err);
+    setStatus("Sync failed");
+    if(showAlert) alert("Sync failed: " + err.message);
+  }
+}
+
+async function loadFromCloud(){
+  const ok = confirm("Load from Supabase? This will replace what is saved on this device.");
+  if(!ok) return;
+  try{
+    setStatus("Loading from Supabase...");
+    const { data, error } = await supabaseClient.from(TABLE)
+      .select("data, updated_at")
+      .eq("workspace_id", WORKSPACE)
+      .single();
+    if(error) throw error;
+    if(!data || !data.data) throw new Error("No cloud data found.");
+    app = data.data;
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(app));
+    setStatus("Loaded from Supabase");
+    render();
+    alert("Loaded from Supabase.");
+  }catch(err){
+    console.error(err);
+    setStatus("Load failed");
+    alert("Load failed: " + err.message);
+  }
+}
+
+function setStatus(text){
+  syncStatus = text;
+  const dot = document.getElementById("syncDot");
+  document.getElementById("syncStatusText").textContent = text;
+  document.getElementById("settingsSyncStatus").textContent = text;
+  dot.style.background = text.includes("failed") || text.includes("failed") ? "var(--danger)" : text.includes("syncing") || text.includes("Loading") ? "var(--warning)" : "var(--ok)";
+}
+
+function money(v){ return Number(v||0).toLocaleString(undefined,{style:"currency",currency:"USD"}); }
+function esc(v){ return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function tone(v){
+  v = String(v||"").toLowerCase();
+  if(v.includes("urgent") || v.includes("out of service")) return "danger";
+  if(v.includes("high") || v.includes("needs") || v.includes("waiting")) return "warning";
+  if(v.includes("complete") || v.includes("approved")) return "ok";
+  return "";
+}
+function card(title, lines=[], tags=[], cls=""){
+  return `<article class="card ${cls}"><h4>${esc(title)}</h4>${lines.filter(Boolean).map(l=>`<p>${esc(l)}</p>`).join("")}<div class="tags">${tags.filter(Boolean).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div></article>`;
+}
+function empty(msg){ return `<p class="meta">${esc(msg)}</p>`; }
+
+function render(){
+  renderDashboard(); renderProjects(); renderBids(); renderTasks(); renderFleet(); renderSettings(); buildReport(false);
+}
+
+function renderDashboard(){
+  const urgentTasks = app.tasks.filter(t => ["Urgent","High"].includes(t.priority) && t.status !== "Complete");
+  const activeProjects = app.projects.filter(p => p.status !== "Complete");
+  const openBids = app.bids.filter(b => !["Approved","Rejected"].includes(b.status));
+  document.getElementById("urgentCount").textContent = urgentTasks.length;
+  document.getElementById("projectCount").textContent = activeProjects.length;
+  document.getElementById("bidCount").textContent = openBids.length;
+
+  document.getElementById("urgentList").innerHTML = urgentTasks.length ? urgentTasks.slice(0,5).map(t=>card(t.name,[t.location,t.notes],[t.priority,t.status,t.frequency],tone(t.priority))).join("") : empty("No urgent repairs entered yet.");
+  document.getElementById("weekList").innerHTML = app.tasks.length ? app.tasks.slice(0,5).map(t=>card(t.name,[t.location,t.notes],[t.frequency,t.priority,t.status],tone(t.priority))).join("") : empty("No maintenance tasks entered yet.");
+  document.getElementById("fleetAlertList").innerHTML = app.vehicles.length ? app.vehicles.filter(v=>v.status!=="Active" || v.serviceDate || v.registration).slice(0,5).map(v=>card(v.name,[`Mileage: ${v.mileage || "Not entered"}`,v.notes],[v.status,v.serviceDate?`Service: ${v.serviceDate}`:"",v.registration?`Registration: ${v.registration}`:""],tone(v.status))).join("") : empty("No fleet alerts yet.");
+  document.getElementById("activeProjectList").innerHTML = activeProjects.length ? activeProjects.slice(0,5).map(p=>card(p.name,[p.location,p.notes],[p.status,p.priority,money(p.cost)],tone(p.priority))).join("") : empty("No active projects yet.");
+  document.getElementById("dashboardBidList").innerHTML = openBids.length ? openBids.slice(0,5).map(b=>card(b.vendor,[`Amount: ${money(b.amount)}`,b.notes,b.file?`File/link: ${b.file}`:""],[b.status,b.date],tone(b.status))).join("") : empty("No open bids yet.");
+}
+
+function renderProjects(){
+  document.getElementById("projectList").innerHTML = app.projects.length ? app.projects.map((p,i)=>card(p.name,[p.location,p.notes],[p.status,p.priority,money(p.cost),p.date],tone(p.priority)) + `<div class="actions no-print"><button class="ghost" onclick="deleteItem('projects',${i})">Delete</button></div>`).join("") : empty("No projects yet.");
+  document.getElementById("bidProject").innerHTML = `<option value="">General / not assigned</option>` + app.projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
+}
+
+function renderBids(){
+  document.getElementById("bidList").innerHTML = app.bids.length ? app.bids.map((b,i)=>{
+    const p = app.projects.find(x=>x.id===b.projectId);
+    return card(b.vendor,[`Project: ${p?p.name:"General / not assigned"}`,`Amount: ${money(b.amount)}`,b.notes,b.file?`File/link: ${b.file}`:""],[b.status,b.date],tone(b.status)) + `<div class="actions no-print"><button class="ghost" onclick="deleteItem('bids',${i})">Delete</button></div>`;
+  }).join("") : empty("No bids yet.");
+}
+
+function renderTasks(){
+  document.getElementById("taskList").innerHTML = app.tasks.length ? app.tasks.map((t,i)=>card(t.name,[t.location,t.notes],[t.frequency,t.priority,t.status,t.date],tone(t.priority)) + `<div class="actions no-print"><button class="ghost" onclick="deleteItem('tasks',${i})">Delete</button></div>`).join("") : empty("No maintenance tasks yet.");
+}
+
+function renderFleet(){
+  document.getElementById("vehicleList").innerHTML = app.vehicles.length ? app.vehicles.map((v,i)=>card(v.name,[`Plate/ID: ${v.plate || "Not entered"}`,`Mileage: ${v.mileage || "Not entered"}`,v.notes],[v.status,v.serviceDate?`Service: ${v.serviceDate}`:"",v.registration?`Registration: ${v.registration}`:""],tone(v.status)) + `<div class="actions no-print"><button class="ghost" onclick="deleteItem('vehicles',${i})">Delete</button></div>`).join("") : empty("No vehicles yet.");
+}
+
+function renderSettings(){
+  document.getElementById("workspaceName").value = app.settings.workspaceName || "";
+  document.getElementById("workspaceNote").value = app.settings.workspaceNote || "";
+}
+
+function addProject(e){ e.preventDefault(); app.projects.push({id:id(),name:projectName.value,location:projectLocation.value,status:projectStatus.value,priority:projectPriority.value,cost:projectCost.value,date:projectDate.value,notes:projectNotes.value}); e.target.reset(); saveLocal(); }
+function addBid(e){ e.preventDefault(); app.bids.push({id:id(),projectId:bidProject.value,vendor:bidVendor.value,amount:bidAmount.value,status:bidStatus.value,file:bidFile.value,date:bidDate.value,notes:bidNotes.value}); e.target.reset(); saveLocal(); }
+function addTask(e){ e.preventDefault(); app.tasks.push({id:id(),name:taskName.value,location:taskLocation.value,date:taskDate.value,frequency:taskFrequency.value,priority:taskPriority.value,status:taskStatus.value,notes:taskNotes.value}); e.target.reset(); saveLocal(); }
+function addVehicle(e){ e.preventDefault(); app.vehicles.push({id:id(),name:vehicleName.value,plate:vehiclePlate.value,mileage:vehicleMileage.value,serviceDate:vehicleService.value,registration:vehicleRegistration.value,status:vehicleStatus.value,notes:vehicleNotes.value}); e.target.reset(); saveLocal(); }
+
+function deleteItem(section,index){
+  if(!confirm("Delete this item?")) return;
+  app[section].splice(index,1);
+  saveLocal();
+}
+
+function buildReport(show=false){
+  const projectTotal = app.projects.reduce((s,p)=>s+Number(p.cost||0),0);
+  const bidTotal = app.bids.reduce((s,b)=>s+Number(b.amount||0),0);
+  const html = `
+    <h2>${esc(app.settings.workspaceName || "Facilities Report")}</h2>
+    <p>${esc(app.settings.workspaceNote || "")}</p>
+    <h3>Summary</h3>
+    <p><strong>Active projects:</strong> ${app.projects.filter(p=>p.status!=="Complete").length}</p>
+    <p><strong>Open bids:</strong> ${app.bids.filter(b=>!["Approved","Rejected"].includes(b.status)).length}</p>
+    <p><strong>Estimated project total:</strong> ${money(projectTotal)}</p>
+    <p><strong>Total bid amounts entered:</strong> ${money(bidTotal)}</p>
+    <h3>Projects</h3>${app.projects.map(p=>card(p.name,[p.location,p.notes],[p.status,p.priority,money(p.cost)],tone(p.priority))).join("") || empty("No projects.")}
+    <h3>Contractor Bids</h3>${app.bids.map(b=>card(b.vendor,[`Amount: ${money(b.amount)}`,b.notes,b.file?`File/link: ${b.file}`:""],[b.status,b.date],tone(b.status))).join("") || empty("No bids.")}
+    <h3>Maintenance</h3>${app.tasks.map(t=>card(t.name,[t.location,t.notes],[t.frequency,t.priority,t.status],tone(t.priority))).join("") || empty("No tasks.")}
+    <h3>Fleet</h3>${app.vehicles.map(v=>card(v.name,[`Mileage: ${v.mileage || "Not entered"}`,v.notes],[v.status,v.serviceDate?`Service: ${v.serviceDate}`:"",v.registration?`Registration: ${v.registration}`:""],tone(v.status))).join("") || empty("No vehicles.")}
+  `;
+  document.getElementById("reportPreview").innerHTML = html;
+  document.getElementById("printReport").innerHTML = html;
+  if(show) showView("reports");
+}
+
+function printBoardReport(){ buildReport(false); window.print(); }
+
+function downloadBackup(){
+  const blob = new Blob([JSON.stringify(app,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `facilities-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function uploadBackup(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{ app = JSON.parse(reader.result); saveLocal(); alert("Backup uploaded."); }
+    catch{ alert("That backup file could not be read."); }
+  };
+  reader.readAsText(file);
+}
+
+function resetLocalData(){
+  if(!confirm("Are you sure? This clears saved data from this device only.")) return;
+  localStorage.removeItem(LOCAL_KEY);
+  app = structuredClone(starter);
+  saveLocal(false);
+}
+
+function showView(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+projectForm.addEventListener("submit", addProject);
+bidForm.addEventListener("submit", addBid);
+taskForm.addEventListener("submit", addTask);
+vehicleForm.addEventListener("submit", addVehicle);
+workspaceName.addEventListener("input", e=>{ app.settings.workspaceName=e.target.value; saveLocal(false); });
+workspaceNote.addEventListener("input", e=>{ app.settings.workspaceNote=e.target.value; saveLocal(false); });
+backupUpload.addEventListener("change", e=>{ if(e.target.files[0]) uploadBackup(e.target.files[0]); e.target.value=""; });
+spreadsheetUpload.addEventListener("change", e=>{ if(e.target.files[0]) handleSpreadsheetFile(e.target.files[0]); e.target.value=""; });
+pdfUpload.addEventListener("change", e=>{ if(e.target.files[0]) handlePdfFile(e.target.files[0]); e.target.value=""; });
+
+
+function normalizeKey(key){
+  return String(key || "").toLowerCase().replace(/[^a-z0-9]/g,"");
+}
+
+function getValue(row, possibleNames){
+  const lookup = {};
+  Object.keys(row).forEach(k => lookup[normalizeKey(k)] = row[k]);
+  for(const name of possibleNames){
+    const found = lookup[normalizeKey(name)];
+    if(found !== undefined && found !== null && String(found).trim() !== "") return String(found).trim();
+  }
+  return "";
+}
+
+function rowsToRecords(rows, type){
+  let added = 0;
+  rows.forEach(row => {
+    if(!row || Object.values(row).every(v => v === null || v === undefined || String(v).trim() === "")) return;
+
+    if(type === "projects"){
+      app.projects.push({
+        id:id(),
+        name:getValue(row,["project","project name","name","title","scope"]) || "Imported project",
+        location:getValue(row,["location","site","building","area"]),
+        status:getValue(row,["status"]) || "Planning",
+        priority:getValue(row,["priority"]) || "Normal",
+        cost:getValue(row,["cost","estimated cost","estimate","amount","budget"]),
+        date:getValue(row,["date","target date","due date"]),
+        notes:getValue(row,["notes","description","scope","details"])
+      });
+      added++;
+    }
+
+    if(type === "bids"){
+      app.bids.push({
+        id:id(),
+        projectId:"",
+        vendor:getValue(row,["vendor","contractor","company","supplier"]) || "Imported vendor",
+        amount:getValue(row,["amount","bid amount","cost","estimate","price"]),
+        status:getValue(row,["status"]) || "Received",
+        file:getValue(row,["file","pdf","link","url","document"]),
+        date:getValue(row,["date","date received","received"]),
+        notes:getValue(row,["notes","scope","description","details"])
+      });
+      added++;
+    }
+
+    if(type === "tasks"){
+      app.tasks.push({
+        id:id(),
+        name:getValue(row,["task","task name","name","maintenance","item"]) || "Imported task",
+        location:getValue(row,["location","site","building","area"]),
+        date:getValue(row,["date","due date","scheduled date"]),
+        frequency:getValue(row,["frequency","recurrence"]) || "One-time",
+        priority:getValue(row,["priority"]) || "Normal",
+        status:getValue(row,["status"]) || "Open",
+        notes:getValue(row,["notes","description","details"])
+      });
+      added++;
+    }
+
+    if(type === "vehicles"){
+      app.vehicles.push({
+        id:id(),
+        name:getValue(row,["vehicle","vehicle name","name","unit"]) || "Imported vehicle",
+        plate:getValue(row,["plate","plate id","license","id"]),
+        mileage:getValue(row,["mileage","miles","odometer"]),
+        serviceDate:getValue(row,["service date","next service","oil change","maintenance date"]),
+        registration:getValue(row,["registration","registration due","tabs","tags"]),
+        status:getValue(row,["status"]) || "Active",
+        notes:getValue(row,["notes","description","details"])
+      });
+      added++;
+    }
+  });
+  return added;
+}
+
+function previewRows(rows){
+  const limited = rows.slice(0, 12);
+  extractionPreview.value = JSON.stringify(limited, null, 2);
+}
+
+async function handleSpreadsheetFile(file){
+  try{
+    const type = spreadsheetImportType.value;
+    const name = file.name.toLowerCase();
+    let rows = [];
+
+    if(name.endsWith(".csv")){
+      const text = await file.text();
+      const workbook = XLSX.read(text, { type: "string" });
+      const firstSheet = workbook.SheetNames[0];
+      rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
+    } else {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: "array" });
+      const firstSheet = workbook.SheetNames[0];
+      rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: "" });
+    }
+
+    previewRows(rows);
+    const confirmed = confirm(`Found ${rows.length} rows. Import these as ${spreadsheetImportType.options[spreadsheetImportType.selectedIndex].text}?`);
+    if(!confirmed) return;
+
+    const added = rowsToRecords(rows, type);
+    saveLocal();
+    alert(`Imported ${added} records.`);
+  }catch(err){
+    console.error(err);
+    alert("Spreadsheet import failed: " + err.message);
+  }
+}
+
+async function extractPdfText(file){
+  if(window.pdfjsLib){
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+  }
+
+  const buffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+  let fullText = "";
+
+  for(let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++){
+    const page = await pdf.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const pageText = content.items.map(item => item.str).join(" ");
+    fullText += `\n\n--- Page ${pageNumber} ---\n${pageText}`;
+  }
+
+  return fullText.trim();
+}
+
+function guessMoneyFromText(text){
+  const matches = text.match(/\$?\s?\d{1,3}(?:,\d{3})*(?:\.\d{2})?/g) || [];
+  const numbers = matches
+    .map(x => Number(x.replace(/[$,\s]/g,"")))
+    .filter(n => !Number.isNaN(n) && n > 100);
+  if(!numbers.length) return "";
+  return Math.max(...numbers);
+}
+
+function guessVendorFromFile(fileName){
+  return fileName.replace(/\.pdf$/i,"").replace(/[_-]+/g," ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+async function handlePdfFile(file){
+  try{
+    const mode = pdfImportType.value;
+    const text = await extractPdfText(file);
+    extractionPreview.value = text || "No readable text found. This may be a scanned/image-only PDF.";
+
+    if(!text){
+      alert("No readable text was found. This may be a scanned PDF.");
+      return;
+    }
+
+    if(mode === "note"){
+      alert("PDF text extracted into the preview box.");
+      return;
+    }
+
+    if(mode === "bid"){
+      const confirmed = confirm("Create a new Contractor Bid using this PDF text?");
+      if(!confirmed) return;
+
+      app.bids.push({
+        id:id(),
+        projectId:"",
+        vendor:guessVendorFromFile(file.name),
+        amount:guessMoneyFromText(text),
+        status:"Received",
+        file:file.name,
+        date:new Date().toISOString().slice(0,10),
+        notes:text.slice(0, 3500)
+      });
+      saveLocal();
+      alert("Created a new Contractor Bid from the PDF text.");
+    }
+
+    if(mode === "project"){
+      const confirmed = confirm("Create a new Project using this PDF text?");
+      if(!confirmed) return;
+
+      app.projects.push({
+        id:id(),
+        name:guessVendorFromFile(file.name),
+        location:"",
+        status:"Planning",
+        priority:"Normal",
+        cost:guessMoneyFromText(text),
+        date:"",
+        notes:text.slice(0, 3500)
+      });
+      saveLocal();
+      alert("Created a new Project from the PDF text.");
+    }
+  }catch(err){
+    console.error(err);
+    alert("PDF extraction failed: " + err.message);
+  }
+}
+
+function copyExtractionToClipboard(){
+  navigator.clipboard.writeText(extractionPreview.value || "");
+  alert("Preview copied.");
+}
+
+function clearExtractionPreview(){
+  extractionPreview.value = "";
+}
+
+
+render();
+setTimeout(()=>loadFromCloudSilent(), 500);
+
+async function loadFromCloudSilent(){
+  try{
+    const { data, error } = await supabaseClient.from(TABLE).select("data, updated_at").eq("workspace_id", WORKSPACE).single();
+    if(error || !data || !data.data) return;
+    const cloudTime = new Date(data.data.updatedAt || data.updated_at || 0).getTime();
+    const localTime = new Date(app.updatedAt || 0).getTime();
+    if(cloudTime > localTime){
+      app = data.data;
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(app));
+      setStatus("Loaded latest cloud data");
+      render();
+    }
+  }catch(err){ console.warn("Silent load skipped:", err.message); }
+}
+</script>
+</body>
+</html>
