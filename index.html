@@ -1,909 +1,752 @@
-<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Facilities Command Center</title>
-    <meta name="theme-color" content="#1d2a38" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Facilities Command" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" href="icon-192.png" type="image/png" />
-    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <main class="app-shell">
-      <div class="shape one" aria-hidden="true"></div>
-      <div class="shape two" aria-hidden="true"></div>
-      <aside class="sidebar">
-        <div class="brand-block">
-          <div class="brand-row">
-            <img class="brand-logo" src="icon-192.png" alt="" />
-            <div class="brand-copy">
-              <p class="eyebrow">Facilities Command Center V2</p>
-              <h1>Good morning, Cord.</h1>
-              <p class="sidebar-subtitle">Calm facilities operations, ready when you are.</p>
-            </div>
-          </div>
-          <div class="sync-card shell-sync-card">
-            <span class="sync-dot" aria-hidden="true"></span>
-            <strong id="headerSyncStatus">Up to date</strong>
-            <span>Saved locally - syncing quietly</span>
-          </div>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Field Operations Command Center</title>
+
+<link rel="stylesheet" href="styles/tokens/tokens.css" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <button class="back-button hidden" id="appBackBtn" type="button" aria-label="Go back">Back</button>
+      <h1>Field Operations Command Center</h1>
+      <p>A calm field desk for facilities, fleet, vendors, documents, and daily work.</p>
+    </div>
+    <div class="sync-pill" data-companion="bee">
+      <span class="sync-dot" id="syncDot"></span>
+      <strong id="syncStatusText">Sign in to load workspace</strong>
+    </div>
+    <button id="openAddNewBtn" class="primary-add-btn" type="button" data-open-add-new>+ Add New</button>
+    <div class="auth-pill" id="authPanel">
+      <input id="authEmail" type="email" placeholder="email for workspace access" autocomplete="email" />
+      <button id="signInBtn" type="button">Sign in</button>
+      <span class="auth-email hidden" id="authUserEmail"></span>
+      <button class="ghost hidden" id="signOutBtn" type="button">Sign out</button>
+    </div>
+  </div>
+
+  <nav class="top-nav" aria-label="Navigation">
+    <button class="tab active" data-view="dashboard">Today</button>
+    <button class="tab" data-view="workOrders">Work Orders</button>
+    <button class="tab" data-view="projects">Projects</button>
+    <button class="tab" data-view="materials">Materials / Takeoffs</button>
+    <button class="tab" data-view="buildings">Buildings</button>
+    <button class="tab" data-view="spaces">Spaces / Rooms</button>
+    <button class="tab" data-view="assets">Assets</button>
+    <button class="tab" data-view="vehicles">Vehicles</button>
+    <button class="tab" data-view="fuelReceipts">Fuel Receipts</button>
+    <button class="tab" data-view="vendors">Vendors / Subcontractors</button>
+    <button class="tab" data-view="budget">Money / Budget</button>
+    <button class="tab" data-view="documents">Documents</button>
+    <button class="tab" data-view="importReview">Import Review</button>
+    <button class="tab" data-view="reports">Reports</button>
+    <button class="tab" data-view="settings">Settings</button>
+  </nav>
+</header>
+
+<main>
+  <div id="addNewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addNewTitle">
+    <div class="modal-card add-new-modal-card">
+      <div class="panel-title">
+        <div>
+          <p class="eyebrow">Quick intake</p>
+          <h2 id="addNewTitle">What do you need to add?</h2>
+          <p class="meta">Choose the closest option. If you are not sure, send it to General Submission and it will land in Review Queue.</p>
         </div>
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="mainNav">
-          <span aria-hidden="true">All sections</span>
-        </button>
-        <nav class="nav-tabs" id="mainNav" aria-label="Tracker views">
-          <button class="tab active" data-view="overview">Overview</button>
-          <button class="tab" data-view="rooms">Rooms</button>
-          <button class="tab" data-view="tasks">Tasks</button>
-          <button class="tab" data-view="calendar">Calendar</button>
-          <button class="tab" data-view="bids">Contractor Bids</button>
-          <button class="tab" data-view="budget">Budget</button>
-          <button class="tab" data-view="decisions">Decisions</button>
-          <button class="tab" data-view="facilitiesDashboard">Facilities Dashboard</button>
-          <button class="tab" data-view="maintenanceCalendar">Maintenance Calendar</button>
-          <button class="tab" data-view="recurringMaintenance">Recurring Maintenance</button>
-          <button class="tab" data-view="fleet">Fleet</button>
-          <button class="tab" data-view="equipment">Equipment</button>
-          <button class="tab" data-view="mileageLog">Mileage Log</button>
-          <button class="tab" data-view="repairLog">Repair Log</button>
-          <button class="tab" data-view="walkthroughChecklist">Walkthrough Checklist</button>
-          <button class="tab" data-view="documentIntake">Review Queue</button>
-          <button class="tab" data-view="contractorLibrary">Contractor Library</button>
-          <button class="tab" data-view="reports">Reports</button>
-          <button class="tab" data-view="syncCenter">Sync Center</button>
-          <button class="tab" data-view="settings">Settings</button>
-        </nav>
-        <div class="rail-profile" aria-label="Workspace status">
-          <span class="rail-status-dot" aria-hidden="true"></span>
-          <div>
-            <strong>Facilities desk</strong>
-            <span>Local-first sync protected</span>
-          </div>
+        <button id="closeAddNewBtn" class="ghost" type="button">Close</button>
+      </div>
+      <div id="addNewGrid" class="add-new-grid"></div>
+    </div>
+  </div>
+
+  <section id="accessDenied" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Access limited</h2>
+          <p id="accessDeniedMessage" class="meta">Your role does not include this area.</p>
         </div>
-      </aside>
+        <button class="ghost" type="button" onclick="showView(defaultViewForRole())">Go to my home</button>
+      </div>
+    </section>
+  </section>
 
-      <section class="workspace">
-        <section class="topbar app-toolbar">
-          <div class="toolbar-brand">
-            <p class="eyebrow">Facilities Command</p>
-            <h2 id="viewTitle">Overview</h2>
-          </div>
-          <div class="toolbar-controls">
-            <label class="toolbar-field" for="projectSelect">
-              <span>Project</span>
-              <select id="projectSelect"></select>
-            </label>
-            <button class="ghost" id="newProjectBtn" type="button">New Project</button>
-            <label class="edit-toggle" for="editModeToggle">
-              <input id="editModeToggle" type="checkbox" />
-              Edit Mode
-            </label>
-            <button class="ghost" id="toolbarSaveBtn" type="button">Save</button>
-          </div>
-          <input id="importFile" type="file" accept="application/json,.json,.xlsx,.xlsm" hidden />
-        </section>
+  <section id="dashboard" class="view active">
+    <section class="home-hero panel editorial-card">
+      <div>
+        <p class="eyebrow">Daily rhythm</p>
+        <h2 id="dailyGreeting">Good morning.</h2>
+        <div id="dailyRhythmLines" class="rhythm-lines"></div>
+      </div>
+      <div class="illustration-anchor" aria-hidden="true"></div>
+      <div class="quick-actions no-print" aria-label="Daily actions">
+        <button type="button" data-open-add-new>+ New Item</button>
+        <button type="button" class="ghost" onclick="showView('documents')">Upload Document</button>
+        <button type="button" class="ghost" onclick="showView('vehicles')">Fleet Status</button>
+        <button type="button" class="ghost" onclick="buildReport(true)">Generate Report</button>
+      </div>
+    </section>
 
-        <section class="view active" id="overview">
-          <section class="overview-hero">
-            <div>
-              <p class="eyebrow">Facilities Command Center</p>
-              <h2>Today's rhythm</h2>
-              <p>A calm place to review what needs attention, choose a workspace, and keep facilities work moving.</p>
-            </div>
-          </section>
-          <section class="home-worktable" aria-label="Daily rhythm">
-            <section class="rhythm-panel">
-              <h3>Daily rhythm</h3>
-              <div class="rhythm-list">
-                <div class="rhythm-item">
-                  <span class="rhythm-icon">1</span>
-                  <div><strong>Start with the Review Queue</strong><span>New files, requests, receipts, estimates, and unusual issues land there first.</span></div>
-                </div>
-                <div class="rhythm-item">
-                  <span class="rhythm-icon">2</span>
-                  <div><strong>Check maintenance and repairs</strong><span>Use the live cards below for due work, open repairs, and follow-up.</span></div>
-                </div>
-                <div class="rhythm-item">
-                  <span class="rhythm-icon">3</span>
-                  <div><strong>Move into the right workspace</strong><span>Choose a card, add the record, then save. The engine handles local save and sync.</span></div>
-                </div>
-              </div>
-            </section>
-            <aside class="notice-panel">
-              <p class="panel-kicker">Quiet notifications</p>
-              <div class="notice-card normal">
-                <h3>Review first</h3>
-                <p>Nothing becomes live work until you decide where it belongs.</p>
-                <button class="text-button" type="button" data-open-view="documentIntake">Open Review Queue</button>
-              </div>
-              <div class="notice-card">
-                <h3>Sync is still protected</h3>
-                <p>Changes save locally first, then sync when the connection is ready.</p>
-              </div>
-            </aside>
-          </section>
-          <section class="workspace-heading" aria-label="Your workspaces">
-            <div>
-              <p class="panel-kicker">Your workspaces</p>
-              <h3>Choose where to work</h3>
-            </div>
-          </section>
-          <section class="workspace-launcher" aria-label="Choose your workspace">
-            <button class="workspace-card review" type="button" data-open-view="documentIntake">
-              <span>Review</span>
-              <strong>Review Queue</strong>
-              <em>PDFs, receipts, and uploads</em>
-            </button>
-            <button class="workspace-card maintenance" type="button" data-open-view="maintenanceCalendar">
-              <span>Maintenance</span>
-              <strong>Maintenance Calendar</strong>
-              <em>Due work and recurring rhythm</em>
-            </button>
-            <button class="workspace-card projects" type="button" data-open-view="rooms">
-              <span>Projects</span>
-              <strong>Rooms & Tasks</strong>
-              <em>Areas, work, materials, and cost</em>
-            </button>
-            <button class="workspace-card fleet" type="button" data-open-view="fleet">
-              <span>Fleet</span>
-              <strong>Fleet</strong>
-              <em>Vehicles, mileage, and repairs</em>
-            </button>
-            <button class="workspace-card calendar" type="button" data-open-view="calendar">
-              <span>Calendar</span>
-              <strong>Calendar</strong>
-              <em>Dated work from across the app</em>
-            </button>
-          </section>
-          <section class="utility-drawer" aria-label="Secondary tools">
-            <div>
-              <p class="panel-kicker">Desk drawers</p>
-              <h3>Quiet tools</h3>
-            </div>
-            <div class="utility-actions">
-              <button type="button" data-open-view="contractorLibrary">Vendors & Bids</button>
-              <button type="button" data-open-view="documentIntake">Files</button>
-              <button type="button" data-open-view="reports">Reports</button>
-              <button type="button" data-open-view="settings">Settings</button>
-              <button type="button" data-open-view="syncCenter">Sync Center</button>
-            </div>
-          </section>
-          <div class="ops-grid">
-            <section class="panel">
-              <div class="panel-title"><h3>Today’s Priorities</h3></div>
-              <div id="todayPriorities" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>Overdue Tasks</h3></div>
-              <div id="dashboardOverdueTasks" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>This Week’s Maintenance</h3></div>
-              <div id="dashboardWeekMaintenance" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>Open Repairs</h3></div>
-              <div id="dashboardOpenRepairs" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>Fleet Items Due</h3></div>
-              <div id="dashboardFleetDue" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>Equipment Due</h3></div>
-              <div id="dashboardEquipmentDue" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>Walkthrough Issues</h3></div>
-              <div id="dashboardWalkthroughIssues" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>Contractor Follow-Ups</h3></div>
-              <div id="dashboardContractorFollowups" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>Unsynced Changes</h3></div>
-              <div id="dashboardUnsyncedChanges" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title"><h3>Recently Uploaded Documents</h3></div>
-              <div id="dashboardRecentDocuments" class="stack"></div>
-            </section>
-          </div>
-          <div class="stats-grid">
-            <article>
-              <span>Total budget</span>
-              <strong id="totalBudget">$0</strong>
-            </article>
-            <article>
-              <span>Estimated spend</span>
-              <strong id="totalEstimate">$0</strong>
-            </article>
-            <article>
-              <span>Tasks complete</span>
-              <strong id="taskProgress">0%</strong>
-            </article>
-            <article>
-              <span>Best bid</span>
-              <strong id="bestBid">TBD</strong>
-            </article>
-            <article>
-              <span>Total sq ft</span>
-              <strong id="totalSqft">0</strong>
-            </article>
-            <article>
-              <span>Budget / sq ft</span>
-              <strong id="budgetPerSqft">TBD</strong>
-            </article>
-            <article>
-              <span>Material costs</span>
-              <strong id="materialCosts">$0</strong>
-            </article>
-            <article>
-              <span>Supplies to buy</span>
-              <strong id="suppliesToBuy">0</strong>
-            </article>
-          </div>
-
-          <div class="dashboard-grid">
-            <section class="panel">
-              <div class="panel-title">
-                <h3>Room Progress</h3>
-              </div>
-              <div id="roomProgress" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title">
-                <h3>Upcoming Work</h3>
-              </div>
-              <div id="upcomingTasks" class="stack"></div>
-            </section>
-            <section class="panel wide">
-              <div class="panel-title">
-                <h3>Bid Comparison</h3>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Contractor</th>
-                      <th>Bid</th>
-                      <th>Timeline</th>
-                      <th>Included</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="bidSummary"></tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-        </section>
-
-        <section class="view" id="rooms">
-          <form class="entry-form page-controlled-form is-collapsed" id="roomForm">
-            <input name="name" placeholder="Room or area" required />
-            <input name="budget" type="number" min="0" step="100" placeholder="Budget" required />
-            <input name="sqft" type="number" min="0" step="1" placeholder="Sq ft" required />
-            <input name="duration" placeholder="Expected time" required />
-            <select name="status">
-              <option>Planning</option>
-              <option>In progress</option>
-              <option>Waiting</option>
-              <option>Done</option>
-            </select>
-            <button type="submit">Save</button>
-            <button type="button" class="cancel-edit" data-cancel="roomForm" hidden>Cancel edit</button>
-          </form>
-          <div id="roomList" class="card-grid"></div>
-        </section>
-
-        <section class="view" id="tasks">
-          <form class="entry-form page-controlled-form is-collapsed" id="taskForm">
-            <input name="title" placeholder="Task" required />
-            <select name="room" id="taskRoom"></select>
-            <input name="start" type="date" required />
-            <input name="due" type="date" required />
-            <input name="duration" placeholder="Expected time" required />
-            <select name="priority">
-              <option>Normal</option>
-              <option>Low</option>
-              <option>High</option>
-              <option>Urgent</option>
-            </select>
-            <input name="estimatedCost" type="number" min="0" step="1" placeholder="Estimated cost" />
-            <input name="contractorCost" type="number" min="0" step="1" placeholder="Contractor cost" />
-            <input name="notes" placeholder="Notes" />
-            <select name="status">
-              <option>Todo</option>
-              <option>Doing</option>
-              <option>Blocked</option>
-              <option>Done</option>
-            </select>
-            <button type="submit">Save</button>
-            <button type="button" class="cancel-edit" data-cancel="taskForm" hidden>Cancel edit</button>
-          </form>
-          <div id="taskList" class="card-grid workflow-grid"></div>
-        </section>
-
-        <section class="view" id="calendar">
-          <div class="dashboard-grid">
-            <section class="panel wide">
-              <div class="panel-title">
-                <div>
-                  <h3>Daily Task Calendar</h3>
-                  <p class="meta" id="calendarToday"></p>
-                </div>
-              </div>
-              <div id="calendarGrid" class="calendar-grid"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title">
-                <h3>Upcoming Tasks</h3>
-              </div>
-              <div id="calendarTaskList" class="stack"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-title">
-                <h3>Buy Before Start</h3>
-              </div>
-              <div id="supplyList" class="stack"></div>
-            </section>
-          </div>
-        </section>
-
-        <section class="view" id="bids">
-          <form class="bid-form page-controlled-form is-collapsed" id="bidForm">
-            <input name="contractor" placeholder="Contractor name" required />
-            <input name="amount" type="number" min="0" step="100" placeholder="Bid amount" required />
-            <input name="timeline" placeholder="Timeline, e.g. 8 weeks" required />
-            <input name="included" placeholder="Included scope" required />
-            <input name="exclusions" placeholder="Exclusions or allowances" />
-            <input name="allowanceAmount" type="number" min="0" step="100" placeholder="Allowance amount" />
-            <select name="materialsIncluded">
-              <option value="">Materials included?</option>
-              <option value="yes">Materials included: yes</option>
-              <option value="no">Materials included: no</option>
-            </select>
-            <select name="laborIncluded">
-              <option value="">Labor included?</option>
-              <option value="yes">Labor included: yes</option>
-              <option value="no">Labor included: no</option>
-            </select>
-            <select name="permitFeesIncluded">
-              <option value="">Permit fees included?</option>
-              <option value="yes">Permit fees included: yes</option>
-              <option value="no">Permit fees included: no</option>
-            </select>
-            <input name="bidDocumentName" placeholder="PDF / document name" />
-            <input name="bidPdfUrl" type="url" placeholder="Google Drive PDF link" />
-            <input name="bidReceivedDate" type="date" />
-            <input name="contact" placeholder="Phone / email" />
-            <input name="notes" placeholder="Bid notes / concerns" />
-            <select name="status">
-              <option>Considering</option>
-              <option>Need details</option>
-              <option>Favorite</option>
-              <option>Declined</option>
-            </select>
-            <textarea name="bidTextSource" class="full-span" rows="7" placeholder="Paste copied bid PDF text here, then click Extract Bid Info. The app will try to fill amount, timeline, allowances, included scope, exclusions, and inclusion flags."></textarea>
-            <button type="button" class="secondary-action" id="extractBidBtn">Extract Bid Info</button>
-            <button type="submit">Save</button>
-            <button type="button" class="cancel-edit" data-cancel="bidForm" hidden>Cancel edit</button>
-          </form>
-          <div id="bidList" class="card-grid bid-grid"></div>
-          <section class="panel wide-panel">
-            <div class="panel-title">
-              <h3>Side-by-Side Bid Comparison</h3>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Contractor</th>
-                    <th>Scope</th>
-                    <th>Total</th>
-                    <th>Labor</th>
-                    <th>Materials</th>
-                    <th>Permit</th>
-                    <th>Tax</th>
-                    <th>Timeline</th>
-                    <th>Warranty</th>
-                    <th>License</th>
-                    <th>Insurance</th>
-                    <th>Flags</th>
-                    <th>Source</th>
-                  </tr>
-                </thead>
-                <tbody id="bidComparisonList"></tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-
-        <section class="view" id="budget">
-          <form class="entry-form page-controlled-form is-collapsed" id="expenseForm">
-            <input name="item" placeholder="Expense or allowance" required />
-            <input name="amount" type="number" min="0" step="10" placeholder="Amount" required />
-            <select name="type">
-              <option>Estimate</option>
-              <option>Committed</option>
-              <option>Paid</option>
-            </select>
-            <button type="submit">Save</button>
-            <button type="button" class="cancel-edit" data-cancel="expenseForm" hidden>Cancel edit</button>
-          </form>
-          <div id="expenseList" class="stack"></div>
-        </section>
-
-        <section class="view" id="decisions">
-          <form class="entry-form page-controlled-form is-collapsed" id="decisionForm">
-            <input name="title" placeholder="Decision needed" required />
-            <input name="owner" placeholder="Owner" required />
-            <select name="status">
-              <option>Open</option>
-              <option>Researching</option>
-              <option>Decided</option>
-            </select>
-            <button type="submit">Save</button>
-            <button type="button" class="cancel-edit" data-cancel="decisionForm" hidden>Cancel edit</button>
-          </form>
-          <div id="decisionList" class="stack"></div>
-        </section>
-
-        <section class="view" id="facilitiesDashboard">
-          <div class="stats-grid">
-            <article><span>Scheduled tasks this week</span><strong id="facilityWeekTasks">0</strong></article>
-            <article><span>Overdue tasks</span><strong id="facilityOverdueTasks">0</strong></article>
-            <article><span>Open repairs</span><strong id="facilityOpenRepairs">0</strong></article>
-            <article><span>Fleet items due</span><strong id="facilityFleetDue">0</strong></article>
-            <article><span>Walkthrough issues</span><strong id="facilityWalkthroughIssues">0</strong></article>
-            <article><span>Completed this month</span><strong id="facilityCompletedMonth">0</strong></article>
-          </div>
-          <section class="panel">
-            <div class="panel-title">
-              <div>
-                <h3>Facilities Import</h3>
-                <p class="meta">Use Load Backup / Excel to import the Meals on Wheels Master Calendar workbook.</p>
-              </div>
-            </div>
-            <div class="report-actions">
-              <button data-facility-report="monthly">Monthly Facilities Report</button>
-              <button data-facility-report="openIssues">Open Issues Report</button>
-              <button data-facility-report="fleet">Fleet Report</button>
-              <button data-facility-report="walkthrough">Walkthrough Report</button>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-title"><h3>This Week</h3></div>
-            <div id="facilityWeekList" class="stack"></div>
-          </section>
-        </section>
-
-        <section class="view" id="maintenanceCalendar">
-          <div class="filter-bar">
-            <select id="maintenanceLocationFilter" data-filter="maintenanceLocation"><option value="">All locations</option></select>
-            <select id="maintenanceFrequencyFilter" data-filter="maintenanceFrequency"><option value="">All frequencies</option></select>
-            <select id="maintenanceStatusFilter" data-filter="maintenanceStatus"><option value="">All statuses</option></select>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Date</th><th>Task</th><th>Frequency</th><th>Location</th><th>Category</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
-              <tbody id="maintenanceCalendarList"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="view" id="recurringMaintenance">
-          <div class="filter-bar">
-            <select id="recurringLocationFilter" data-filter="recurringLocation"><option value="">All locations</option></select>
-            <select id="recurringFrequencyFilter" data-filter="recurringFrequency"><option value="">All frequencies</option></select>
-            <select id="recurringAssignedFilter" data-filter="recurringAssigned"><option value="">All assigned</option></select>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Frequency</th><th>Location / Area</th><th>Task</th><th>Assigned To</th><th>Timing</th><th>Notes</th></tr></thead>
-              <tbody id="recurringMaintenanceList"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="view" id="fleet">
-          <div class="filter-bar">
-            <select id="fleetVehicleFilter" data-filter="fleetVehicle"><option value="">All vehicles</option></select>
-            <select id="fleetStatusFilter" data-filter="fleetStatus"><option value="">All statuses</option></select>
-          </div>
-          <div class="dashboard-grid">
-            <section class="panel wide">
-              <div class="panel-title"><h3>Fleet Schedule</h3></div>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th>Frequency</th><th>Task</th><th>Applies To</th><th>Suggested Timing</th><th>Wear / Tear Items</th><th>Trigger</th><th>Assigned To</th><th>Notes</th></tr></thead>
-                  <tbody id="fleetScheduleList"></tbody>
-                </table>
-              </div>
-            </section>
-            <section class="panel wide">
-              <div class="panel-title"><h3>Fleet Master</h3></div>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th>Vehicle</th><th>Type</th><th>Plate / VIN</th><th>Mileage</th><th>Oil Change</th><th>Tire Rotation</th><th>Last Service</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
-                  <tbody id="fleetVehicleList"></tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-        </section>
-
-        <section class="view" id="equipment">
-          <section class="panel">
-            <div class="panel-title">
-              <div>
-                <h3>Equipment</h3>
-                <p class="meta">Track kitchen, facility, utility, HVAC, TB, and other serviceable equipment.</p>
-              </div>
-            </div>
-            <form class="entry-form intake-form page-controlled-form is-collapsed" id="equipmentForm">
-              <input name="name" placeholder="Equipment name, e.g. TB unit" required />
-              <input name="type" placeholder="Type / category" />
-              <input name="location" placeholder="Location" />
-              <input name="modelSerial" placeholder="Model / serial" />
-              <input name="serviceFrequency" placeholder="Service frequency" />
-              <input name="lastServiceDate" type="date" />
-              <input name="nextServiceDue" type="date" />
-              <input name="vendor" placeholder="Vendor / service company" />
-              <select name="status">
-                <option>Active</option>
-                <option>Service Due</option>
-                <option>Needs Repair</option>
-                <option>Out of Service</option>
-                <option>Retired</option>
-              </select>
-              <input name="notes" placeholder="Notes" />
-              <button type="submit">Save</button>
-              <button type="button" class="cancel-edit" data-cancel="equipmentForm" hidden>Cancel edit</button>
-            </form>
-          </section>
-          <section class="panel wide-panel">
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Equipment</th><th>Type</th><th>Location</th><th>Model / Serial</th><th>Frequency</th><th>Last Service</th><th>Next Due</th><th>Vendor</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
-                <tbody id="equipmentList"></tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-
-        <section class="view" id="mileageLog">
-          <div class="filter-bar">
-            <select id="mileageVehicleFilter" data-filter="mileageVehicle"><option value="">All vehicles</option></select>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Date</th><th>Vehicle</th><th>Start</th><th>End</th><th>Miles Driven</th><th>Driver</th><th>Notes</th></tr></thead>
-              <tbody id="mileageLogList"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="view" id="repairLog">
-          <div class="filter-bar">
-            <select id="repairStatusFilter" data-filter="repairStatus"><option value="">All statuses</option></select>
-          </div>
-          <div id="repairLogList" class="card-grid workflow-grid"></div>
-        </section>
-
-        <section class="view" id="walkthroughChecklist">
-          <div class="filter-bar">
-            <select id="walkthroughLocationFilter" data-filter="walkthroughLocation"><option value="">All locations</option></select>
-            <select id="walkthroughStatusFilter" data-filter="walkthroughStatus"><option value="">All statuses</option></select>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Location</th><th>Check Area</th><th>Item to Inspect</th><th>Status</th><th>Notes / Follow-up</th></tr></thead>
-              <tbody id="walkthroughChecklistList"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="view" id="documentIntake">
-          <section class="panel">
-            <div class="panel-title">
-              <div>
-                <h3>Review Queue</h3>
-                <p class="meta">New files, requests, receipts, estimates, and unusual issues land here first. Review them, then decide where they belong.</p>
-              </div>
-            </div>
-            <form class="entry-form intake-form" id="documentIntakeForm">
-              <input name="sourceFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,image/*,application/pdf" />
-              <input name="sourceFileUrl" type="url" placeholder="Google Drive source file link" />
-              <select name="documentType">
-                <option>Bid</option>
-                <option>Invoice</option>
-                <option>Estimate</option>
-                <option>Contract</option>
-                <option>Receipt</option>
-                <option>Insurance</option>
-                <option>License</option>
-                <option>Other</option>
-              </select>
-              <input name="category" placeholder="Project / room / category" />
-              <input name="contractorVendor" placeholder="Contractor / vendor name" />
-              <select name="destination">
-                <option value="bids">Save to Contractor Bids</option>
-                <option value="budget">Save to Budget</option>
-                <option value="repairLog">Save to Repair Log</option>
-                <option value="maintenanceCalendar">Save to Maintenance Calendar</option>
-                <option value="equipment">Save to Equipment Notes</option>
-                <option value="contractorLibrary">Save to Contractor Library</option>
-                <option value="reports">Save to Reports</option>
-              </select>
-              <textarea name="documentText" class="full-span" rows="8" placeholder="Paste copied PDF text here if direct extraction is not available."></textarea>
-              <button type="button" id="extractDocumentBtn">Extract & Review</button>
-            </form>
-          </section>
-          <section class="panel" id="documentReviewPanel" hidden>
-            <div class="panel-title">
-              <div>
-                <h3>Here is what we found. Please confirm before saving.</h3>
-                <p class="meta" id="duplicateNotice"></p>
-              </div>
-            </div>
-            <form class="entry-form intake-form" id="documentReviewForm">
-              <input name="vendorName" placeholder="Vendor name" />
-              <input name="phone" placeholder="Phone" />
-              <input name="email" type="email" placeholder="Email" />
-              <input name="address" placeholder="Address" />
-              <input name="licenseNumber" placeholder="License number" />
-              <input name="insuranceInfo" placeholder="Insurance information" />
-              <input name="estimateNumber" placeholder="Bid / estimate / invoice number" />
-              <input name="date" type="date" />
-              <input name="expirationDate" type="date" />
-              <input name="laborCost" type="number" min="0" step="1" placeholder="Labor cost" />
-              <input name="materialsCost" type="number" min="0" step="1" placeholder="Materials cost" />
-              <input name="permitCost" type="number" min="0" step="1" placeholder="Permit cost" />
-              <input name="tax" type="number" min="0" step="1" placeholder="Tax" />
-              <input name="totalCost" type="number" min="0" step="1" placeholder="Total cost" />
-              <input name="timeline" placeholder="Timeline / start date / completion" />
-              <input name="warranty" placeholder="Warranty information" />
-              <input name="paymentTerms" placeholder="Payment terms" />
-              <select name="status">
-                <option>Needs Review</option>
-                <option>Waiting on Contractor</option>
-                <option>Ready to Save</option>
-                <option>Saved</option>
-              </select>
-              <textarea name="scope" class="full-span" rows="4" placeholder="Scope of work"></textarea>
-              <textarea name="notes" class="full-span" rows="3" placeholder="Notes"></textarea>
-              <div class="report-actions full-span">
-                <button type="button" data-save-document="bids">Approve as Bid</button>
-                <button type="button" data-save-document="budget">Approve as Cost</button>
-                <button type="button" data-save-document="repairLog">Approve as Repair</button>
-                <button type="button" data-save-document="maintenanceCalendar">Approve as Maintenance</button>
-                <button type="button" data-save-document="equipment">Attach to Equipment</button>
-                <button type="button" data-save-document="contractorLibrary">Link to Contractor</button>
-              </div>
-            </form>
-          </section>
-          <section class="panel">
-            <div class="panel-title"><h3>Queue History</h3></div>
-            <div id="documentIntakeList" class="stack"></div>
-          </section>
-        </section>
-
-        <section class="view" id="contractorLibrary">
-          <form class="entry-form intake-form page-controlled-form is-collapsed" id="contractorLibraryForm">
-            <input name="name" placeholder="Contractor / vendor name" required />
-            <input name="contactPerson" placeholder="Contact person" />
-            <input name="phone" placeholder="Phone" />
-            <input name="email" type="email" placeholder="Email" />
-            <input name="address" placeholder="Address" />
-            <input name="licenseNumber" placeholder="License number" />
-            <input name="insuranceStatus" placeholder="Insurance status" />
-            <input name="servicesOffered" placeholder="Services offered" />
-            <select name="status">
-              <option>Active</option>
-              <option>Preferred</option>
-              <option>Do Not Use</option>
-              <option>Needs Follow-Up</option>
-            </select>
-            <input name="notes" placeholder="Notes" />
-            <button type="submit">Save</button>
-            <button type="button" class="cancel-edit" data-cancel="contractorLibraryForm" hidden>Cancel edit</button>
-          </form>
-          <div id="contractorLibraryList" class="card-grid"></div>
-        </section>
-
-        <section class="view" id="reports">
-          <section class="panel">
-            <div class="panel-title">
-              <div>
-                <h3>Custom Report Builder</h3>
-                <p class="meta">Choose a date range and the sections to include, then print or save as PDF.</p>
-              </div>
-            </div>
-            <form class="report-builder" id="reportBuilder">
-              <label>
-                Start date
-                <input id="reportStartDate" type="date" />
-              </label>
-              <label>
-                End date
-                <input id="reportEndDate" type="date" />
-              </label>
-              <div class="check-grid">
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="summary" checked /> Project summary</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="rooms" checked /> Rooms</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="tasks" checked /> Tasks</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="materials" /> Materials</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="bids" checked /> Contractor bids</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="budget" /> Budget / expenses</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="maintenance" checked /> Maintenance calendar</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="recurring" /> Recurring maintenance</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="fleet" checked /> Fleet</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="equipment" checked /> Equipment</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="mileage" /> Mileage log</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="repairs" checked /> Repair log</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="walkthrough" checked /> Walkthrough checklist</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="decisions" /> Decisions</label>
-                <label class="checkbox-row"><input type="checkbox" name="sections" value="instructions" /> Facilities instructions</label>
-              </div>
-              <div class="report-actions">
-                <button type="button" id="selectAllReportSections">Select all</button>
-                <button type="button" id="clearReportSections">Clear</button>
-                <button type="button" id="previewReportBtn">Preview report</button>
-                <button type="button" id="printCustomReportBtn">Print custom report</button>
-              </div>
-            </form>
-          </section>
-          <section class="panel">
-            <div class="panel-title"><h3>Report Preview</h3></div>
-            <div class="report-preview" id="reportPreview"></div>
-          </section>
-        </section>
-
-        <section class="view" id="syncCenter">
-          <section class="panel">
-            <div class="panel-title">
-              <div>
-                <h3>Sync Center</h3>
-                <p class="meta">Sync local changes when you are online. Core records sync to Supabase; backups stay optional.</p>
-              </div>
-            </div>
-            <div class="sync-dashboard">
-              <div><span>Current status</span><strong id="syncCenterStatusStandalone">Saved</strong></div>
-              <div><span>Last sync</span><strong id="syncCenterLastSyncStandalone">Never</strong></div>
-              <div><span>Unsynced changes</span><strong id="syncCenterUnsyncedStandalone">0</strong></div>
-            </div>
-            <div class="report-actions">
-              <button type="button" class="ghost" id="syncCenterSaveBtn">Save legacy backup</button>
-              <button type="button" class="ghost" id="syncCenterLoadBtn">Load legacy backup</button>
-              <button type="button" class="ghost" id="syncCenterRetryBtn">Sync now</button>
-              <button type="button" class="ghost" id="syncCenterClearSyncedBtn">Clear synced history</button>
-              <button type="button" class="ghost" id="syncCenterClearCacheBtn">Clear local cache</button>
-              <button type="button" class="ghost" id="syncCenterExportBtn">Export backup</button>
-              <button type="button" class="ghost" id="syncCenterImportBtn">Import backup</button>
-            </div>
-            <div id="syncLogListStandalone" class="stack"></div>
-          </section>
-        </section>
-
-        <section class="view" id="settings">
-          <section class="panel">
-            <div class="panel-title"><h3>Project Reference</h3></div>
-            <div class="entry-form">
-              <input id="projectName" type="text" placeholder="Project / workspace name" />
-              <input id="targetDate" type="date" />
-              <input id="expectedDuration" type="text" placeholder="Planning note" />
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-title">
-              <div>
-                <h3>Legacy Backup</h3>
-                <p class="meta">Optional backup connection. Room sync uses Supabase from local changes.</p>
-              </div>
-            </div>
-            <div class="sync-panel" id="syncPanel" aria-label="Legacy backup sync">
-              <label for="backendUrl">Legacy backup URL</label>
-              <input id="backendUrl" type="url" />
-              <label class="checkbox-row" for="autoSyncToggle">
-                <input id="autoSyncToggle" type="checkbox" />
-                Auto-save legacy backup
-              </label>
-              <label class="checkbox-row" for="autoLoadToggle">
-                <input id="autoLoadToggle" type="checkbox" />
-                Auto-load latest legacy backup when opening
-              </label>
-              <button class="ghost" id="saveCloudBtn">Save backup</button>
-              <button class="ghost" id="loadCloudBtn">Load backup</button>
-              <button class="ghost" id="restoreDefaultBackendBtn" type="button">Use default URL</button>
-              <p class="save-status" id="syncStatus">Room sync ready</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-title"><h3>Sync Center</h3></div>
-            <div class="sync-dashboard">
-              <div><span>Current status</span><strong id="syncCenterStatus">Saved</strong></div>
-              <div><span>Last sync</span><strong id="syncCenterLastSync">Never</strong></div>
-              <div><span>Unsynced changes</span><strong id="syncCenterUnsynced">0</strong></div>
-            </div>
-            <div class="report-actions">
-              <button type="button" class="ghost" id="retrySyncBtn">Sync now</button>
-              <button type="button" class="ghost" id="clearSyncedQueueBtn">Clear synced history</button>
-              <button type="button" class="ghost" id="clearLocalCacheBtn">Clear local cache</button>
-            </div>
-            <div id="syncLogList" class="stack"></div>
-          </section>
-          <section class="panel">
-            <div class="panel-title"><h3>Local Files</h3></div>
-            <div class="report-actions">
-              <button type="button" class="ghost" id="settingsExportBtn">Save Backup</button>
-              <button type="button" class="ghost" id="settingsImportBtn">Load Backup / Excel</button>
-            </div>
-          </section>
-        </section>
-      </section>
-    </main>
-
-    <nav class="bottom-nav" aria-label="Mobile primary navigation">
-      <button class="bottom-tab active" data-view="overview">Dashboard</button>
-      <button class="bottom-tab" data-view="calendar">Calendar</button>
-      <button class="bottom-tab" data-view="maintenanceCalendar">Maintenance</button>
-      <button class="bottom-tab" data-view="fleet">Fleet</button>
-      <button class="bottom-tab" data-view="reports">Reports</button>
-    </nav>
-
-    <aside class="sync-dock" id="bottomSyncCenter" aria-label="Compact sync center">
-      <button class="sync-dock-bar" id="syncDockToggle" type="button" aria-expanded="false">
-        <span class="sync-dot" id="syncDockDot" aria-hidden="true"></span>
-        <span id="syncDockStatus">Saved</span>
-        <span class="sync-pending-count" id="syncPendingCount">0 pending</span>
-        <span id="saveStatus" hidden>Saved</span>
-        <span class="sync-dock-open">Open</span>
+    <section class="workspace-grid" aria-label="Primary workspaces">
+      <button class="workspace-card review" type="button" onclick="showView('importReview')">
+        <span>Import Review</span>
+        <strong id="reviewQueueCount">0 waiting</strong>
+        <em>Extracted files and incoming items wait here before becoming records.</em>
       </button>
-      <div class="sync-dock-panel">
-        <div class="sync-dock-head">
-          <div>
-            <strong>Sync Center</strong>
-            <p>Local changes and room sync</p>
-          </div>
-          <button class="sync-dock-close" id="syncDockClose" type="button">Close</button>
+      <button class="workspace-card maintenance" type="button" onclick="showView('workOrders')">
+        <span>Work Orders</span>
+        <strong id="workspaceMaintenanceCount">0 due today</strong>
+        <em>Field tasks linked to buildings, spaces, assets, vendors, vehicles, and projects.</em>
+      </button>
+      <button class="workspace-card projects" type="button" onclick="showView('projects')">
+        <span>Projects</span>
+        <strong id="workspaceProjectCount">0 active</strong>
+        <em>Contracting work, remodels, repairs, budgets, and timelines.</em>
+      </button>
+      <button class="workspace-card materials" type="button" onclick="showView('materials')">
+        <span>Materials / Takeoffs</span>
+        <strong>Review first</strong>
+        <em>Contractor material lists staged for approval before becoming budget records.</em>
+      </button>
+      <button class="workspace-card fleet" type="button" onclick="showView('vehicles')">
+        <span>Vehicles</span>
+        <strong id="workspaceFleetCount">0 to check</strong>
+        <em>Fleet service, odometer, VIN, plate, maintenance, and alerts.</em>
+      </button>
+      <button class="workspace-card fuel" type="button" onclick="showView('fuelReceipts')">
+        <span>Fuel Receipts</span>
+        <strong id="workspaceFuelCount">0 receipts</strong>
+        <em>Gas receipts linked to vehicles, documents, odometer, and budget.</em>
+      </button>
+      <button class="workspace-card vendors" type="button" onclick="showView('vendors')">
+        <span>Vendors / Subcontractors</span>
+        <strong id="workspaceBidCount">0 open</strong>
+        <em>Contacts, bids, subcontractor follow-up, and recommendations.</em>
+      </button>
+      <button class="workspace-card files" type="button" onclick="showView('documents')">
+        <span>Documents</span>
+        <strong id="workspaceFileCount">0 linked</strong>
+        <em>PDF, Excel, CSV, photos, estimates, reports, and extracted text.</em>
+      </button>
+      <button class="workspace-card calendar" type="button" onclick="showView('budget')">
+        <span>Money / Budget</span>
+        <strong id="workspaceCalendarCount">0 upcoming</strong>
+        <em>Estimates, bids, invoices, approved budget, and paid items.</em>
+      </button>
+      <button class="workspace-card reports" type="button" onclick="showView('reports')">
+        <span>Reports</span>
+        <strong>Board-ready</strong>
+        <em>Readable summaries from live operational data.</em>
+      </button>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Needs attention today</h2>
+          <p class="meta">Work orders, vehicle service, urgent items, and budget/vendor follow-up.</p>
         </div>
-        <label>
-          Legacy backup URL
-          <input id="bottomBackendUrl" type="url" />
+        <button onclick="syncNow()">Refresh</button>
+      </div>
+      <div class="grid three">
+        <div class="stat"><span>Urgent / high work orders</span><strong id="urgentCount">0</strong></div>
+        <div class="stat"><span>Active projects</span><strong id="projectCount">0</strong></div>
+        <div class="stat"><span>Open bids</span><strong id="bidCount">0</strong></div>
+      </div>
+    </section>
+
+    <div class="grid two">
+      <section class="panel"><div class="panel-title"><div><h3>Urgent Work Orders</h3><p class="meta">High priority field work.</p></div></div><div id="urgentList" class="card-list"></div></section>
+      <section class="panel"><div class="panel-title"><div><h3>This Week</h3><p class="meta">Open work orders and reminders.</p></div></div><div id="weekList" class="card-list"></div></section>
+      <section class="panel"><div class="panel-title"><div><h3>Vehicle Alerts</h3><p class="meta">Vehicles due, overdue, or in maintenance.</p></div></div><div id="fleetAlertList" class="card-list"></div></section>
+      <section class="panel"><div class="panel-title"><div><h3>Active Projects</h3><p class="meta">Remodels, repairs, and planning.</p></div></div><div id="activeProjectList" class="card-list"></div></section>
+    </div>
+
+    <section class="panel">
+      <div class="panel-title"><div><h3>Contractor Bids</h3><p class="meta">Open estimates needing review.</p></div></div>
+      <div id="dashboardBidList" class="card-list"></div>
+    </section>
+  </section>
+
+  <section id="importReview" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Import Review</h2>
+          <p class="meta">Extracted PDF, Excel, CSV, and incoming field notes wait here before becoming live records.</p>
+        </div>
+        <button class="ghost" type="button" data-admin-only onclick="showView('importCenter')">Open Import Tools</button>
+      </div>
+      <div id="reviewDropZone" class="drop-zone" tabindex="0">
+        <strong>Drop photos, PDFs, receipts, or estimates here</strong>
+        <p class="meta">Files staged here stay in Review Queue until someone approves or routes them.</p>
+      </div>
+      <div id="reviewUploadPreview" class="upload-preview-list"></div>
+      <form id="submissionForm" class="mobile-short-form">
+        <label>Submitted by<input id="submissionName" placeholder="Staff, office, vendor, import..." /></label>
+        <label data-submitter-optional>Contact<input id="submissionContact" placeholder="Email, phone, or department" /></label>
+        <label>Category
+          <select id="submissionCategory">
+            <option>Building</option>
+            <option>Kitchen / Equipment</option>
+            <option>Vehicle</option>
+            <option>Cleaning</option>
+            <option>Safety</option>
+            <option>Event Setup</option>
+            <option>Vendor / Delivery</option>
+            <option>Something unusual happened</option>
+          </select>
         </label>
-        <div class="sync-dock-meta">
-          <span>Last sync</span>
-          <strong id="syncDockLastSync">Never</strong>
-        </div>
-        <div class="sync-dock-actions">
-          <button type="button" id="bottomSaveCloudBtn">Save backup</button>
-          <button type="button" id="bottomLoadCloudBtn">Load backup</button>
-          <button type="button" id="bottomRetrySyncBtn">Sync now</button>
-          <button type="button" id="bottomClearSyncedBtn">Clear synced history</button>
+        <label>Urgency
+          <select id="submissionUrgency">
+            <option>Normal</option>
+            <option>High</option>
+            <option>Urgent</option>
+          </select>
+        </label>
+        <label>Location<input id="submissionLocation" placeholder="Kitchen, Valley, Francis, Fleet..." /></label>
+        <label data-submitter-optional>Source
+          <select id="submissionSource">
+            <option>Manual entry</option>
+            <option>Staff portal</option>
+            <option>Office request</option>
+            <option>File import</option>
+            <option>Vendor message</option>
+          </select>
+        </label>
+        <label class="full">What happened?<textarea id="submissionDescription" required placeholder="Short notes, context, safety concerns, or next step needed..."></textarea></label>
+        <label class="full">Attach photo/document/receipt<input id="submissionUpload" type="file" accept=".pdf,.csv,.xlsx,.xls,image/*" /></label>
+        <p id="submissionSaveState" class="meta full" data-state="">Ready</p>
+        <div class="actions full"><button type="submit">Add to Import Review</button></div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h3>Waiting for Review</h3>
+          <p class="meta">Approve when it is ready to become operational work.</p>
         </div>
       </div>
-    </aside>
+      <div id="submissionList" class="card-list"></div>
+    </section>
+  </section>
 
-    <section class="print-report" id="printReport" aria-hidden="true"></section>
+  <section id="reviewDetail" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2 id="reviewDetailTitle">Review Submission</h2>
+          <p id="reviewDetailMeta" class="meta">Fix the fields before approving this into operational records.</p>
+        </div>
+        <div class="actions no-print">
+          <button class="ghost" type="button" onclick="showView('importReview')">Back to Review</button>
+          <button type="button" id="reviewApproveBtn">Approve Work Order</button>
+          <button class="danger" type="button" id="reviewRejectBtn">Reject / Archive</button>
+        </div>
+      </div>
+      <form id="reviewDetailForm"></form>
+    </section>
+  </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
-    <script src="app.js"></script>
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./service-worker.js");
-        });
-      }
-    </script>
-  </body>
+  <section id="projects" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Projects</h2><p class="meta">Use for remodels, repairs, board asks, and major facilities needs.</p></div></div>
+      <form id="projectForm">
+        <label>Project name<input id="projectName" required placeholder="Kitchen remodel, bathroom demo..." /></label>
+        <label>Location<input id="projectLocation" placeholder="Kitchen, Valley, Francis..." /></label>
+        <label>Status<select id="projectStatus"><option>Planning</option><option>In progress</option><option>Waiting on bid</option><option>Needs approval</option><option>Complete</option></select></label>
+        <label>Priority<select id="projectPriority"><option>Normal</option><option>High</option><option>Urgent</option></select></label>
+        <label>Estimated cost<input id="projectCost" type="number" min="0" step="0.01" placeholder="0.00" /></label>
+        <label>Approved budget<input id="projectBudget" type="number" min="0" step="0.01" placeholder="0.00" /></label>
+        <label>Target date<input id="projectDate" type="date" /></label>
+        <label>Owner / lead<input id="projectOwner" placeholder="Facilities lead, vendor, staff..." /></label>
+        <label class="full">Notes<textarea id="projectNotes" placeholder="Why this matters, safety issues, next steps..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Project</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Project List</h3></div><div id="projectList" class="card-list"></div></section>
+  </section>
+
+  <section id="vendors" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Vendors & Bids</h2><p class="meta">Track estimates, vendors, PDF/file names, follow-up, and board recommendations.</p></div></div>
+      <form id="vendorForm">
+        <label>Vendor / subcontractor<input id="vendorName" required placeholder="Company or contractor name" /></label>
+        <label>Type<input id="vendorType" placeholder="Plumbing, electrical, fuel, general..." /></label>
+        <label>Contact name<input id="vendorContact" placeholder="Primary contact" /></label>
+        <label>Phone<input id="vendorPhone" type="tel" placeholder="Phone number" /></label>
+        <label>Email<input id="vendorEmail" type="email" placeholder="Email address" /></label>
+        <label>Status<select id="vendorStatus"><option>active</option><option>needs_review</option><option>inactive</option><option>archived</option></select></label>
+        <label>Insurance expires<input id="vendorInsurance" type="date" /></label>
+        <label class="full">Notes<textarea id="vendorNotes" placeholder="Licenses, insurance, scope, pricing notes, concerns..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Vendor</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Vendor List</h3></div><div id="vendorList" class="card-list"></div></section>
+
+    <section class="panel">
+      <div class="panel-title"><div><h3>Bid Intake</h3><p class="meta">Bids become budget items linked to vendors, projects, documents, and reports.</p></div></div>
+      <form id="bidForm">
+        <label>Project<select id="bidProject"></select></label>
+        <label>Contractor / vendor<input id="bidVendor" required placeholder="Vendor name" /></label>
+        <label>Bid amount<input id="bidAmount" type="number" min="0" step="0.01" placeholder="0.00" /></label>
+        <label>Status<select id="bidStatus"><option>Received</option><option>Needs review</option><option>Recommended</option><option>Approved</option><option>Rejected</option></select></label>
+        <label>PDF/file name or link<input id="bidFile" placeholder="bid.pdf or https://..." /></label>
+        <label>Date received<input id="bidDate" type="date" /></label>
+        <label>Follow-up date<input id="bidFollowupDate" type="date" /></label>
+        <label>Recommended?<select id="bidRecommended"><option>No</option><option>Yes</option></select></label>
+        <label class="full">Notes<textarea id="bidNotes" placeholder="Scope, exclusions, concerns, recommendation..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Bid</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Bid Comparison</h3></div><div id="bidList" class="card-list"></div></section>
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h3>Board Cost Comparison</h3>
+          <p class="meta">Quick view of low, high, recommended, and total bid amounts.</p>
+        </div>
+      </div>
+      <div id="vendorBidSummary"></div>
+    </section>
+  </section>
+
+  <section id="materials" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Materials / Takeoffs</h2>
+          <p class="meta">Fast material lists for contractor review. Approved lists become budget items linked to projects, work orders, vendors, and receipts.</p>
+        </div>
+      </div>
+      <form id="materialForm" class="mobile-short-form">
+        <label class="full">List title<input id="materialTitle" required placeholder="Restroom 2 sink repair materials" /></label>
+        <label>Project<select id="materialProject"></select></label>
+        <label>Work order<select id="materialWorkOrder"></select></label>
+        <label>Vendor<select id="materialVendor"></select></label>
+        <label>Document / receipt<select id="materialDocument"></select></label>
+        <label class="full">Material lines<textarea id="materialLines" required placeholder="Description | quantity | unit | estimated unit cost | actual cost&#10;P-trap kit | 1 | each | 18.50&#10;Supply line | 2 | each | 9.25"></textarea></label>
+        <label class="full">Notes<textarea id="materialNotes" placeholder="Why it is needed, substitution notes, approval context..."></textarea></label>
+        <p id="materialSaveState" class="meta full" data-state="">Ready</p>
+        <div class="actions full"><button type="submit">Submit Material List</button></div>
+      </form>
+    </section>
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h3>Materials Review</h3>
+          <p class="meta">Lists wait here until Owner/Admin approves them into budget tracking.</p>
+        </div>
+      </div>
+      <div id="materialReviewList" class="card-list"></div>
+    </section>
+  </section>
+
+  <section id="workOrders" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Work Orders</h2><p class="meta">Field work linked to buildings, spaces, assets, vehicles, vendors, and projects.</p></div></div>
+      <form id="taskForm">
+        <label>Work order<input id="taskName" required placeholder="Leak repair, inspection, service call..." /></label>
+        <label>Location<input id="taskLocation" placeholder="Kitchen, Valley, Francis..." /></label>
+        <label>Due date<input id="taskDate" type="date" /></label>
+        <label>Assigned person<input id="taskAssigned" placeholder="Name, team, or vendor" /></label>
+        <label>Related project<select id="taskProject"></select></label>
+        <label>Related building<select id="taskBuilding"></select></label>
+        <label>Related space / room<select id="taskSpace"></select></label>
+        <label>Related asset<select id="taskAsset"></select></label>
+        <label>Related vehicle<select id="taskVehicle"></select></label>
+        <label>Related vendor<select id="taskVendorBid"></select></label>
+        <label>Frequency<select id="taskFrequency"><option>One-time</option><option>Daily</option><option>Weekly</option><option>Twice monthly</option><option>Monthly</option><option>Quarterly</option><option>Yearly</option></select></label>
+        <label>Priority<select id="taskPriority"><option>Normal</option><option>High</option><option>Urgent</option></select></label>
+        <label>Status<select id="taskStatus"><option>Open</option><option>In progress</option><option>Complete</option></select></label>
+        <label class="full">Notes<textarea id="taskNotes" placeholder="Specific steps, equipment notes, safety reminders..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Task</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Work Order List</h3></div><div id="taskList" class="card-list"></div></section>
+    <section class="panel" data-admin-only>
+      <div class="panel-title"><div><h3>Archived Work Orders</h3><p class="meta">Recoverable records kept out of the active field list.</p></div></div>
+      <div id="archivedTaskList" class="card-list"></div>
+    </section>
+  </section>
+
+  <section id="workOrderDetail" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2 id="workOrderDetailTitle">Work Order</h2>
+          <p id="workOrderDetailMeta" class="meta">Details, links, documents, and status for this work order.</p>
+        </div>
+        <div class="actions no-print">
+          <button class="ghost" type="button" onclick="showView('workOrders')">Back to Work Orders</button>
+          <button type="button" id="workOrderDetailEditBtn">Edit</button>
+          <button class="ghost" type="button" id="workOrderDetailCompleteBtn">Mark Complete</button>
+          <button class="danger" type="button" id="workOrderDetailArchiveBtn">Archive</button>
+        </div>
+      </div>
+      <div id="workOrderDetailBody"></div>
+    </section>
+  </section>
+
+  <section id="buildings" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Buildings</h2><p class="meta">Supabase-backed building records with address, status, notes, and archive handling.</p></div></div>
+      <form id="buildingForm">
+        <label>Building name<input id="buildingName" required placeholder="Main kitchen, Valley site..." /></label>
+        <label>Code<input id="buildingCode" placeholder="Optional short code" /></label>
+        <label>Status<select id="buildingStatus"><option>active</option><option>inactive</option><option>archived</option></select></label>
+        <label>Address<input id="buildingAddress" placeholder="Street address or site notes" /></label>
+        <label class="full">Notes<textarea id="buildingNotes" placeholder="Access, contacts, constraints..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Building</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Building List</h3></div><div id="buildingList" class="card-list"></div></section>
+  </section>
+
+  <section id="spaces" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Spaces / Rooms</h2><p class="meta">Rooms, kitchens, offices, yards, mechanical rooms, and other field locations under buildings.</p></div></div>
+      <form id="spaceForm">
+        <label>Building<select id="spaceBuilding"></select></label>
+        <label>Space / room name<input id="spaceName" required placeholder="Kitchen, loading dock, office..." /></label>
+        <label>Type<input id="spaceType" placeholder="Kitchen, office, mechanical..." /></label>
+        <label>Floor / area<input id="spaceFloor" placeholder="1, basement, yard..." /></label>
+        <label>Status<select id="spaceStatus"><option>active</option><option>inactive</option><option>archived</option></select></label>
+        <label class="full">Notes<textarea id="spaceNotes" placeholder="Access, equipment, safety notes..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Space</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Space List</h3></div><div id="spaceList" class="card-list"></div></section>
+  </section>
+
+  <section id="assets" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Assets</h2><p class="meta">Equipment, systems, fixtures, and tagged assets connected to spaces and work orders.</p></div></div>
+      <form id="assetForm">
+        <label>Building<select id="assetBuilding"></select></label>
+        <label>Space<select id="assetSpace"></select></label>
+        <label>Asset name<input id="assetName" required placeholder="Freezer, hood, van lift..." /></label>
+        <label>Asset tag<input id="assetTag" placeholder="Tag or internal ID" /></label>
+        <label>Category<input id="assetCategory" placeholder="Kitchen equipment, HVAC..." /></label>
+        <label>Status<select id="assetStatus"><option>active</option><option>needs_service</option><option>out_of_service</option><option>archived</option></select></label>
+        <label class="full">Notes<textarea id="assetNotes" placeholder="Model, serial, warranty, service notes..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Asset</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Asset List</h3></div><div id="assetList" class="card-list"></div></section>
+  </section>
+
+  <section id="vehicles" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Vehicles</h2><p class="meta">Fleet tracking with service status, VIN, odometer, plate, and maintenance alerts.</p></div></div>
+      <form id="vehicleForm">
+        <label>Vehicle name<input id="vehicleName" required placeholder="Van 1, kitchen truck..." /></label>
+        <label>Vehicle number<input id="vehicleNumber" placeholder="Unit number" /></label>
+        <label>Plate / ID<input id="vehiclePlate" placeholder="Plate or internal ID" /></label>
+        <label>VIN<input id="vehicleVin" placeholder="Vehicle identification number" /></label>
+        <label>Mileage<input id="vehicleMileage" type="number" min="0" placeholder="Current mileage" /></label>
+        <label>Last service date<input id="vehicleLastService" type="date" /></label>
+        <label>Next service date<input id="vehicleService" type="date" /></label>
+        <label>Registration due<input id="vehicleRegistration" type="date" /></label>
+        <label>Warranty / title notes<input id="vehicleWarranty" placeholder="Warranty, title, tags, insurance..." /></label>
+        <label>Status<select id="vehicleStatus"><option>Active</option><option>Due for service</option><option>Overdue for service</option><option>In maintenance</option><option>Out of service</option></select></label>
+        <label class="full">Notes<textarea id="vehicleNotes" placeholder="Oil change, tire rotation, warranty, repair notes..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Vehicle</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Fleet List</h3></div><div id="vehicleList" class="card-list"></div></section>
+  </section>
+
+  <section id="fuelReceipts" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Fuel Receipts</h2>
+          <p class="meta">Gas receipts attached to vehicles, documents, odometer readings, and budget tracking.</p>
+        </div>
+        <button class="ghost" type="button" onclick="showView('documents')">Upload Receipt</button>
+      </div>
+      <form id="fuelReceiptForm">
+        <label>Vehicle<select id="fuelVehicle"></select></label>
+        <label>Date<input id="fuelDate" type="date" /></label>
+        <label>Gas station / vendor<input id="fuelVendor" placeholder="Station or vendor name" /></label>
+        <label>Gallons<input id="fuelGallons" type="number" min="0" step="0.001" placeholder="0.000" /></label>
+        <label>Total amount<input id="fuelTotal" type="number" min="0" step="0.01" placeholder="0.00" /></label>
+        <label>Price per gallon<input id="fuelPrice" type="number" min="0" step="0.001" placeholder="0.000" /></label>
+        <label>Odometer<input id="fuelOdometer" type="number" min="0" step="1" placeholder="Current odometer" /></label>
+        <label>Receipt file/link<input id="fuelReceiptFile" placeholder="receipt image, PDF, or storage path" /></label>
+        <label class="full">Notes<textarea id="fuelNotes" placeholder="Route, card used, exception notes, or extraction confidence..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Fuel Receipt</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Fuel Receipt History</h3></div><div id="fuelReceiptList" class="card-list"></div></section>
+  </section>
+
+  <section id="budget" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Money / Budget</h2><p class="meta">Estimates, bids, invoices, expenses, approved budget, and change orders.</p></div></div>
+      <form id="budgetForm">
+        <label>Label<input id="budgetLabel" required placeholder="Fuel, invoice, change order, estimate..." /></label>
+        <label>Type<select id="budgetType"><option value="expense">Expense</option><option value="estimate">Estimate</option><option value="bid">Bid</option><option value="contract">Contract</option><option value="invoice">Invoice</option><option value="fuel">Fuel</option><option value="change_order">Change order</option><option value="budget">Budget</option></select></label>
+        <label>Status<select id="budgetStatus"><option value="draft">Draft</option><option value="submitted">Submitted</option><option value="approved">Approved</option><option value="paid">Paid</option><option value="rejected">Rejected</option></select></label>
+        <label>Amount<input id="budgetAmount" type="number" min="0" step="0.01" placeholder="0.00" /></label>
+        <label>Date<input id="budgetDate" type="date" /></label>
+        <label>Project<select id="budgetProject"></select></label>
+        <label>Vendor<select id="budgetVendor"></select></label>
+        <label>Work order<select id="budgetWorkOrder"></select></label>
+        <label>Fuel receipt<select id="budgetFuelReceipt"></select></label>
+        <label class="full">Notes<textarea id="budgetNotes" placeholder="Budget context, invoice number, approval status, board notes..."></textarea></label>
+        <div class="actions full"><button type="submit">Add Money Item</button></div>
+      </form>
+    </section>
+    <section class="panel">
+      <div class="panel-title"><h3>Budget List</h3></div>
+      <div id="budgetList" class="card-list"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-title"><h3>Bid Comparison</h3></div>
+      <div id="bidComparisonSummary"></div>
+    </section>
+  </section>
+
+  <section id="reports" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Reports</h2><p class="meta">Board-ready summaries from the current records.</p></div></div>
+      <div class="actions">
+        <button onclick="buildReport(true)">Preview Report</button>
+        <button onclick="printBoardReport()">Print / Save as PDF</button>
+        <button class="ghost" onclick="downloadBackup()">Download Backup</button>
+      </div>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Report Preview</h3></div><div id="reportPreview"></div></section>
+  </section>
+
+  <section id="documents" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Documents</h2>
+          <p class="meta">PDF, Excel, CSV, photos, estimates, and reports stored in Supabase Storage and linked to records.</p>
+        </div>
+        <button class="ghost" type="button" data-admin-only onclick="showView('importCenter')">Extract From File</button>
+      </div>
+      <form id="fileForm" class="mobile-upload-form">
+        <label>File name or link<input id="fileName" required placeholder="estimate.pdf, inspection report, photo link..." /></label>
+        <label>Type<select id="fileType"><option>Contract</option><option>Bid</option><option>Estimate</option><option>Invoice</option><option>Fuel Receipt</option><option>Inspection</option><option>Photo</option><option>Report</option><option>Checklist</option><option>Other</option></select></label>
+        <label>Upload file<input id="documentUpload" type="file" accept=".pdf,.csv,.xlsx,.xls,image/*" /></label>
+        <label>Related building<select id="fileBuilding"></select></label>
+        <label>Related space / room<select id="fileSpace"></select></label>
+        <label>Related asset<select id="fileAsset"></select></label>
+        <label>Related project<select id="fileProject"></select></label>
+        <label>Related work order<select id="fileWorkOrder"></select></label>
+        <label>Related vehicle<select id="fileVehicle"></select></label>
+        <label>Related vendor<select id="fileBid"></select></label>
+        <label>Related fuel receipt<select id="fileFuelReceipt"></select></label>
+        <label>Related budget item<select id="fileBudgetItem"></select></label>
+        <label>Source<input id="fileSource" placeholder="Upload, vendor, office, import..." /></label>
+        <label class="full">Notes<textarea id="fileNotes" placeholder="What this file proves, where it came from, or what to review..."></textarea></label>
+        <p id="fileSaveState" class="meta full" data-state="">Ready</p>
+        <div class="actions full"><button type="submit">Upload / Add Document</button></div>
+      </form>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Document Library</h3></div><div id="fileList" class="card-list"></div></section>
+  </section>
+
+  <section id="calendar" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Calendar</h2>
+          <p class="meta">A dated view of work already living in projects, maintenance, fleet, and bids.</p>
+        </div>
+      </div>
+      <div class="grid three">
+        <div class="stat"><span>Due today</span><strong id="calendarTodayCount">0</strong></div>
+        <div class="stat"><span>Next 7 days</span><strong id="calendarWeekCount">0</strong></div>
+        <div class="stat"><span>All dated items</span><strong id="calendarTotalCount">0</strong></div>
+      </div>
+    </section>
+    <section class="panel"><div class="panel-title"><h3>Dated Work</h3></div><div id="calendarList" class="card-list"></div></section>
+  </section>
+
+
+  <section id="importCenter" class="view">
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h2>Import / Extraction Center</h2>
+          <p class="meta">Pull information from Excel, CSV, and PDF files into the Review Queue before it becomes live work.</p>
+        </div>
+      </div>
+
+      <div class="grid two">
+        <section class="panel" style="box-shadow:none;">
+          <div class="panel-title">
+            <div>
+              <h3>Excel / CSV Import</h3>
+              <p class="meta">Best for task lists, bid logs, project lists, and fleet records.</p>
+            </div>
+          </div>
+
+          <label>What should these rows become after review?
+            <select id="spreadsheetImportType">
+              <option value="auto">Auto-detect from columns</option>
+              <option value="tasks">Maintenance Tasks</option>
+              <option value="projects">Projects</option>
+              <option value="bids">Contractor Bids</option>
+              <option value="vehicles">Fleet Vehicles</option>
+              <option value="fuelReceipts">Fuel Receipts</option>
+              <option value="vendors">Vendors</option>
+              <option value="assets">Assets</option>
+              <option value="budget_item">Budget Items</option>
+            </select>
+          </label>
+
+          <div class="actions">
+            <label class="ghost" style="display:inline-flex;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-weight:700;">
+              Choose Excel / CSV File
+              <input id="spreadsheetUpload" type="file" accept=".csv,.xlsx,.xls" hidden />
+            </label>
+          </div>
+
+          <p class="meta small">Smart import is on. Recognized records are staged in Review Queue first so they can be checked, approved, or archived.</p>
+        </section>
+
+        <section class="panel" style="box-shadow:none;">
+          <div class="panel-title">
+            <div>
+              <h3>PDF Text Extraction</h3>
+              <p class="meta">Use this for contractor bids, estimates, scopes of work, and reports.</p>
+            </div>
+          </div>
+
+          <label>Stage extracted PDF text as:
+            <select id="pdfImportType">
+              <option value="bid">Contractor Bid Review</option>
+              <option value="project">Project Review</option>
+              <option value="fuelReceipt">Fuel Receipt Review</option>
+              <option value="note">General Review Note</option>
+            </select>
+          </label>
+
+          <div class="actions">
+            <label class="ghost" style="display:inline-flex;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-weight:700;">
+              Choose PDF File
+              <input id="pdfUpload" type="file" accept=".pdf" hidden />
+            </label>
+          </div>
+
+          <p class="meta small">PDF extraction works best on typed PDFs. Scanned/image-only PDFs may not extract readable text.</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h3>Extraction Preview</h3>
+          <p class="meta">Review what was found before relying on it.</p>
+        </div>
+      </div>
+      <textarea id="extractionPreview" class="full" style="width:100%;min-height:220px;" placeholder="Extracted text or spreadsheet preview will appear here."></textarea>
+      <div class="actions">
+        <button type="button" onclick="copyExtractionToClipboard()">Copy Preview Text</button>
+        <button type="button" class="ghost" onclick="clearExtractionPreview()">Clear Preview</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">
+        <div>
+          <h3>Column Matching</h3>
+          <p class="meta">Fix or match spreadsheet columns before rows are staged in Import Review.</p>
+        </div>
+      </div>
+      <div id="mappingPanel" class="card-list"></div>
+      <div class="actions">
+        <button type="button" onclick="stageMappedRows()">Stage Matched Rows</button>
+      </div>
+    </section>
+  </section>
+
+  <section id="settings" class="view">
+    <section class="panel">
+      <div class="panel-title"><div><h2>Settings</h2><p class="meta">Supabase is the source of truth. Browser storage is not used as the primary database.</p></div></div>
+      <div class="form-grid">
+        <label>Workspace name<input id="workspaceName" /></label>
+        <label>Planning note<input id="workspaceNote" /></label>
+      </div>
+      <div class="actions">
+        <button onclick="syncNow()">Refresh From Supabase</button>
+        <button class="ghost" onclick="flushPendingWrites(true)">Retry Pending Writes</button>
+        <button class="ghost" onclick="loadFromCloud()">Reload Workspace</button>
+        <button class="ghost" onclick="downloadBackup()">Download Backup</button>
+        <label class="ghost" style="display:inline-flex;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-weight:700;">
+          Upload Backup
+          <input id="backupUpload" type="file" accept="application/json" hidden />
+        </label>
+      </div>
+      <p class="meta small">Status: <strong id="settingsSyncStatus">Sign in to load workspace</strong></p>
+      <p class="meta small">Pending retry queue: <strong id="pendingQueueCount">0</strong></p>
+      <div id="pendingQueueDetails" class="card-list"></div>
+      <p class="meta small">Direct table writes are on: creates, edits, archives, documents, and import reviews write to normalized <strong>field_ops_*</strong> tables.</p>
+      <p class="meta small">Workspace: <strong id="settingsWorkspaceId">Not loaded</strong></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><div><h3>App Maintenance</h3><p class="meta">Only use this if you want to clear this device.</p></div></div>
+      <button class="danger" onclick="resetLocalData()">Clear Temporary Cache</button>
+    </section>
+  </section>
+</main>
+
+
+<div class="modal-backdrop" id="editModal">
+  <div class="modal">
+    <div class="panel-title">
+      <div>
+        <h3 id="editModalTitle">Edit Item</h3>
+        <p class="meta">Make changes, then save. Records write directly to Supabase.</p>
+      </div>
+      <button class="ghost" type="button" onclick="closeEditModal()">Close</button>
+    </div>
+    <form id="editForm"></form>
+  </div>
+</div>
+
+<section id="printReport"></section>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="state/app-state.js"></script>
+<script src="components/cards.js"></script>
+<script src="components/forms.js"></script>
+<script src="auth/roles.js"></script>
+<script src="auth/session.js"></script>
+<script src="services/supabase-service.js"></script>
+<script src="services/mappers.js"></script>
+<script src="services/import-review-service.js"></script>
+<script src="services/materials-service.js"></script>
+<script src="sync/pending-queue.js"></script>
+<script src="services/auth-service.js"></script>
+<script src="services/sync-service.js"></script>
+<script src="services/interaction-service.js"></script>
+<script src="views/registry.js"></script>
+<script src="views/today-dashboard.js"></script>
+<script src="views/work-orders.js"></script>
+<script src="views/documents.js"></script>
+<script src="views/projects-budget.js"></script>
+<script src="views/materials.js"></script>
+<script src="views/review-queue.js"></script>
+<script src="views/fleet.js"></script>
+<script src="app.js"></script>
+</body>
 </html>
+

@@ -40,6 +40,7 @@ The app should make facilities work feel manageable, connected, and clear.
 - Muted rust only for urgent alerts
 
 Avoid:
+
 - harsh white
 - neon colors
 - bright red everywhere
@@ -162,17 +163,7 @@ Each card should show:
 
 - 1 to 2 key stats
 - a small activity indicator
-- any important “needs attention” signal
-
-Example:
-
-```text
-Maintenance
-14 due this week
-3 due today
-```
-
----
+- any important "needs attention" signal
 
 ### 2. Review Queue
 
@@ -203,8 +194,6 @@ Actions:
 
 Urgent items should be visually contained but clear.
 
----
-
 ### 3. Projects
 
 Purpose:
@@ -234,8 +223,6 @@ Workspace sections:
 - Waiting on Vendor/Bid
 - Scheduled
 - Completed
-
----
 
 ### 4. Maintenance
 
@@ -274,8 +261,6 @@ Quick actions:
 - Link File
 - Move to Project
 
----
-
 ### 5. Fleet
 
 Purpose:
@@ -301,8 +286,6 @@ Workspace sections:
 - Registration / Tags Due
 - Recent Repairs
 - Fleet Files
-
----
 
 ### 6. Vendors & Bids
 
@@ -340,8 +323,6 @@ Board comparison should show:
 - notes/concerns
 - file links
 
----
-
 ### 7. Files
 
 Purpose:
@@ -378,9 +359,7 @@ Files should support:
 - pull records
 - archive
 
-Do not show “imported on” as a main visible label unless troubleshooting.
-
----
+Do not show "imported on" as a main visible label unless troubleshooting.
 
 ### 8. Calendar
 
@@ -406,8 +385,6 @@ Views:
 - Month
 - List
 
----
-
 ### 9. Reports
 
 Purpose:
@@ -424,8 +401,6 @@ Report types:
 - Board Approval Packet
 
 Reports should use existing data and attached files.
-
----
 
 ### 10. Settings
 
@@ -466,7 +441,7 @@ Guided options:
 - Vendor / Delivery
 - Something unusual happened
 
-The “Something unusual happened” option is required because facilities work is unpredictable.
+The "Something unusual happened" option is required because facilities work is unpredictable.
 
 Submission flow should collect:
 
@@ -480,7 +455,7 @@ Submission flow should collect:
 Submission confirmation should be friendly:
 
 ```text
-Saved — we’ll take a look at it.
+Saved - we'll take a look at it.
 ```
 
 Not:
@@ -721,6 +696,7 @@ calendar.js
 - workspace cards
 - navigation
 - Supabase connection
+- basic auth/session gate for cloud sync
 - shared data load/save
 
 #### Phase 2: Core records
@@ -760,7 +736,7 @@ calendar.js
 - fleet reports
 - maintenance calendar reports
 
-#### Phase 7: Roles/auth
+#### Phase 7: Roles/auth expansion
 
 Later, add:
 
@@ -769,7 +745,41 @@ Later, add:
 - office
 - viewer
 
-Do not build full auth before the V2 structure is stable.
+Do not build full role complexity before the V2 structure is stable.
+
+---
+
+## Senior Implementation Adjustment
+
+The original blueprint put auth in Phase 7. That is right for full roles and permissions, but the current Supabase database now requires signed-in access after the RLS cleanup. Therefore:
+
+- Basic Supabase session handling belongs in Phase 1.
+- Role modeling still belongs later.
+- The current app can continue local-first when signed out.
+- Cloud sync should only run after sign-in.
+- Future row-level policies should move from "any authenticated user" to workspace membership.
+
+Recommended long-term access model:
+
+```text
+workspaces
+  -> workspace_memberships
+  -> users / profiles
+  -> facilities
+  -> work_items
+  -> projects
+  -> vehicles
+  -> vendors
+  -> bids
+  -> files
+  -> submissions
+```
+
+The durable rule:
+
+```text
+Signed-in user can read/write a record only if they belong to that record's workspace.
+```
 
 ---
 
@@ -781,9 +791,13 @@ Do not build full auth before the V2 structure is stable.
 - Items should open into detail/focus view before editing.
 - Calendar is a view of dated records, not separate data.
 - Submissions should go to Review Queue first.
+- File and spreadsheet imports should also stage in Review Queue before becoming live records.
 - Urgent submissions should create contained alerts.
 - Staff portal should be guided and friendly.
 - The app should feel modern, calm, capable, and warm.
 - Visual style should lean blue/green mid-century archival workspace.
 - Files should support records, not become the main workflow.
-- Visible “imported on” labels should be removed from normal UI.
+- Visible "imported on" labels should be removed from normal UI.
+- Basic auth is now required for cloud sync because Supabase RLS has been hardened.
+- Import Center is a utility behind Review Queue/Files, not a primary workspace tab.
+- Calendar and Files are primary workspaces in the app shell.
